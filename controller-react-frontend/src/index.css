@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "JosefinSansSemiBold";
+    src: local("JosefinSansSemiBold"), url(./fonts/JosefinSans-SemiBold.ttf) format("truetype"));
+}
+
+body {
+  margin: 0;
+  background-color: #373737ff;
+}

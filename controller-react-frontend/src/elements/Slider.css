@@ -1,0 +1,54 @@
+.SliderEffector {
+    display: grid;
+    grid-template-rows: 512px 64px 160px;
+    grid-template-columns: 32px 192px 32px;
+}
+.SliderEffectorTrack {
+    width: 64px;
+    height: 512px;
+    grid-column: 2/3;
+    background-color: #373737;
+    -webkit-user-drag: none;
+}
+.SliderEffectorHid {
+    position: relative;
+    width: 192px;
+    height: 80px;
+    background-color: #656565;
+    border-radius: 32px;
+    grid-column: 2/3;
+    grid-row: 1/2;
+    margin-top: 432px;
+    cursor: grab;
+}
+.SliderEffectorGrid {
+    position: relative;
+    width: 192px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-column: 2/3;
+    grid-row: 1/2;
+    -webkit-user-drag: none;
+}
+.SliderValue {
+    background-color: #373737;
+    width: 256px;
+    height: 160px;
+    border-radius: 32px;
+    grid-row: 3/4;
+}
+.SliderRealValue {
+    font-size: 122px;
+    text-align: center;
+    font-family: Josefin Sans;
+    margin: 10%;
+    color: white;
+    font-weight: 600;
+    user-select: none;
+    -webkit-user-drag: none
+}
+.SliderEffectorTrackValue {
+    grid-column: 2/3;
+    grid-row: 1/2;
+    cursor: grabbing;
+}

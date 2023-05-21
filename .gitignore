@@ -1,2 +1,17 @@
 /controller-node-tests/node_modules
 /controller-react-frontend/node_modules
+/controller-rust/target
+/controller-react-frontend/.pnp
+/controller-react-frontend/.pnp.js
+/controller-react-frontend/coverage
+/controller-react-frontend/build
+/controller-react-frontend/.DS_Store
+/controller-react-frontend/.env.local
+/controller-react-frontend/.env.development.local
+/controller-react-frontend/.env.test.local
+/controller-react-frontend/.env.production.local
+/controller-react-frontend/npm-debug.log*
+/controller-react-frontend/yarn-debug.log*
+/controller-react-frontend/yarn-error.log*
+/controller-react-frontend/public/concept.svg
+
