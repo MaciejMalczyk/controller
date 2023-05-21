@@ -14,7 +14,8 @@ Node.js: https://nodejs.org/en
 Any SBC with libgpio kernel driver enabled. Any 2 stepper motors with any 2 stepper drivers that utilizes "step pin" for motor stepping.
 
 ## Build 
-cd into controller-rust and run `cargo build` to build backend
+Go into controller-rust and run `cargo build` to build backend
+Go into controller-react-frontend and run `npm install` to install frontend packages
 
 ## Start 
 Run `cargo run` in controller-rust dir and `npm start` in controller-react-frontend dir
