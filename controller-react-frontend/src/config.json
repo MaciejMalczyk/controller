@@ -1,0 +1,5 @@
+{
+    "motor1_max_speed": 4.5,
+    "motor2_max_speed": 4.5,
+    "backend_addr": "127.0.0.1:8080"
+}

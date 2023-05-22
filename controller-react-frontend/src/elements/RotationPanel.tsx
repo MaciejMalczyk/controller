@@ -4,6 +4,7 @@ import Slider from './Slider';
 import Button from './Button';
 import MotorValues from '../tools/MotorValues';
 import { WebsocketServers } from '../tools/Websocket';
+import config from '../config.json';
 
 const ButtonsPanel = () => {
     
@@ -37,10 +38,10 @@ const RotationPanel = () => {
         <div className="RotationPanel">
             <div className="RotationPanelSliders">
                 <div className="RotationPanelSliderL">
-                    <Slider config={{variable: "vel1", maxValue: 8 }}></Slider>
+                    <Slider config={{variable: "vel1", maxValue: config.motor1_max_speed }}></Slider>
                 </div>
                 <div className="RotationPanelSliderR">
-                    <Slider config={{variable: "vel2", maxValue: 5 }}></Slider>
+                    <Slider config={{variable: "vel2", maxValue: config.motor2_max_speed }}></Slider>
                 </div>
             </div>
             <ButtonsPanel></ButtonsPanel>

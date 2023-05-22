@@ -1,16 +1,12 @@
 class Websocket {
     ws: WebSocket;
     
-    constructor() {
-        // this.ws = new WebSocket("ws://rockpro64.local:8080");
-        this.ws = new WebSocket("ws://127.0.0.1:8080");
+    constructor(address: string) {
+        this.ws = new WebSocket(`ws://${address}`);
         this.start();
     }
     
     start() {
-        //console.log("starting")
-        //this.ws = new WebSocket("ws://rockpro64.local:8080");
-        
         this.ws.onerror = (err) => {
             console.log(err);
         }
@@ -40,8 +36,9 @@ let WebsocketServers: { [key: number]: Websocket } = [];
 
 let iterator = 0;
 
-function InitWs() {
-    WebsocketServers[iterator] = new Websocket();
+function InitWs(address: string) {
+    WebsocketServers[iterator] = new Websocket(address);
+    iterator += 1;
 }
 
-export { WebsocketServers, InitWs};
+export { WebsocketServers, InitWs };

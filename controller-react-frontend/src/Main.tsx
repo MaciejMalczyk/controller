@@ -3,10 +3,11 @@ import './Main.css';
 import Switch from './elements/Switch';
 import RotationPanel from './elements/RotationPanel';
 import { InitWs } from './tools/Websocket';
+import config from './config.json';
+
+InitWs(config.backend_addr);
 
 const Main = () => {
-    
-    InitWs();
     
     return (
         <div id="MainGrid">
