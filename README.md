@@ -16,6 +16,7 @@ Any SBC with libgpio kernel driver enabled. Any 2 stepper motors with any 2 step
 ## Build 
 Go into controller-rust and run `cargo build` to build backend
 Go into controller-react-frontend and run `npm install` to install frontend packages
+
 Go into controller-node-tests and run `npm install` to install tests
 
 ## Start 
