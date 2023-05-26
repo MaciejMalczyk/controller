@@ -20,12 +20,11 @@ use tokio::{
 #[tokio::main]
 async fn main() {
 	
-	let gpiochip3_31 = gpio::GpioChip::new("/dev/gpiochip3").unwrap();
-	let gpiochip3_27 = gpio::GpioChip::new("/dev/gpiochip3").unwrap();
+	let gpiochip3 = gpio::GpioChip::new("/dev/gpiochip3").unwrap();
 	
 	let steppers = HashMap::from([
-		(1,Arc::new(Mutex::new(Motor::init(gpiochip3_31, 31, 1.0)))),
-		(2,Arc::new(Mutex::new(Motor::init(gpiochip3_27, 27, 1.0)))),
+		(1,Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0)))),
+		(2,Arc::new(Mutex::new(Motor::init(&gpiochip3, 27, 1.0)))),
 	]);
 	
 	let state = ws_server::PeerMap::new(Mutex::new(HashMap::new()));

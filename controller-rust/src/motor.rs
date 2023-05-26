@@ -23,7 +23,7 @@ pub struct Motor {
 }
 
 impl Motor {
-    pub fn init(chip: gpio::GpioChip, pin_num: u32, rot_per_s: f32) -> Motor {
+    pub fn init(chip: &gpio::GpioChip, pin_num: u32, rot_per_s: f32) -> Motor {
         let mut m = Motor { 
             disable: false,
             pin: chip.request("gpioA", gpio::RequestFlags::OUTPUT,  pin_num, 0).unwrap(),
