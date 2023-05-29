@@ -22,17 +22,24 @@ async fn main() {
 	
 	let gpiochip3 = gpio::GpioChip::new("/dev/gpiochip3").unwrap();
 	
-	let steppers = HashMap::from([
-		(1,Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0)))),
-		(2,Arc::new(Mutex::new(Motor::init(&gpiochip3, 27, 1.0)))),
-	]);
+	let dev = devices::Devices {
+		motors: HashMap::from([
+			(1,Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0)))),
+			(2,Arc::new(Mutex::new(Motor::init(&gpiochip3, 27, 1.0)))),
+		]),
+		stops: HashMap::from([
+			(1,Arc::new(Mutex::new(true))),
+			(2,Arc::new(Mutex::new(true))),
+		]),
+	};
+	
 	
 	let state = ws_server::PeerMap::new(Mutex::new(HashMap::new()));
 	
 	let ws_server_task = task::spawn({
 		let state = state.clone();
 		async move {
-			let mut ws = ws_server::WsServer::init(state, steppers);
+			let mut ws = ws_server::WsServer::init(state, dev);
 			ws.spawn().await;
 		}
 	});

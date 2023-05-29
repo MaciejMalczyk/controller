@@ -24,12 +24,12 @@ use std::{
 
 use serde::Deserialize;
 
-use crate::devices::Motors;
+use crate::devices::{ Devices };
 
 pub type PeerMap = Arc<Mutex<HashMap<SocketAddr, UnboundedSender<Message>>>>;
 pub struct WsServer {
     state: PeerMap,
-    motors: Motors,
+    devices: Devices,
 }
 
 #[derive(Deserialize, Debug)]
@@ -40,10 +40,10 @@ struct MotorMsg {
 }
 
 impl WsServer {
-    pub fn init(state: PeerMap, motors: Motors) -> WsServer {
+    pub fn init(state: PeerMap, devices: Devices ) -> WsServer {
         WsServer {
             state: state,
-            motors: motors,
+            devices: devices,
         }
     }
     
@@ -55,11 +55,11 @@ impl WsServer {
 
         // Let's spawn the handling of each connection in a separate task.
         while let Ok((stream, addr)) = listener.accept().await {
-            tokio::spawn(connection(self.state.clone(), stream, addr, self.motors.clone()));
+            tokio::spawn(connection(self.state.clone(), stream, addr, self.devices.clone()));
         }
         
         
-        async fn connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr, mut motors: Motors) {
+        async fn connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr, mut devices: Devices) {
                 //listen for connection
             println!("New connection: {}", addr);
             
@@ -93,7 +93,7 @@ impl WsServer {
                                             "start" => {
                                                 println!("Motor {:?} start", message.motor);
                                                 task::spawn({
-                                                    let motor_clone = motors.get_mut(&message.motor).expect("REASON").clone();
+                                                    let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
                                                     async move {
                                                         motor_clone.lock().await.enable();
                                                         loop {
@@ -108,7 +108,7 @@ impl WsServer {
                                             "stop" => {
                                                 println!("Motor {:?} stop", message.motor);
                                                 task::spawn({
-                                                    let motor_clone = motors.get_mut(&message.motor).expect("REASON").clone();
+                                                    let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
                                                     async move {
                                                         let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
                                                         motor_guard.disable();
@@ -118,7 +118,7 @@ impl WsServer {
                                             "speed" => {
                                                 println!("Motor {:?} speed set to {}", message.motor, message.speed);
                                                 task::spawn({
-                                                    let motor_clone = motors.get_mut(&message.motor).expect("REASON").clone();
+                                                    let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
                                                     async move {
                                                         motor_clone.lock().await.set_speed(message.speed);
                                                     }

@@ -7,4 +7,8 @@ use std::{
 
 use tokio::sync::Mutex;
 
-pub type Motors = HashMap<u8, Arc<Mutex<Motor>>>;
+#[derive(Clone)]
+pub struct Devices {
+	pub motors: HashMap<u8, Arc<Mutex<Motor>>>,
+	pub stops: HashMap<u8, Arc<Mutex<bool>>>,
+}
