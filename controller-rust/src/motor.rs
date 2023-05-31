@@ -50,8 +50,8 @@ impl Motor {
         sleep(self.sleep/2);
         self.pin.set(0).unwrap();
         sleep(self.sleep/2);
-        if self.sleep*999/1000 > ((self.second/self.freq) as u32)*self.u_s {
-            self.sleep = self.sleep*999/1000;
+        if self.sleep*990/1000 > ((self.second/self.freq) as u32)*self.u_s {
+            self.sleep = self.sleep*990/1000;
         } else {
             self.sleep = ((self.second/self.freq) as u32)*self.u_s;
         }
