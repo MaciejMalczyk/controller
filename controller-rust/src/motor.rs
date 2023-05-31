@@ -26,7 +26,7 @@ impl Motor {
     pub fn init(chip: &gpio::GpioChip, pin_num: u32, rot_per_s: f32) -> Motor {
         let mut m = Motor { 
             disable: false,
-            pin: chip.request("gpioA", gpio::RequestFlags::OUTPUT,  pin_num, 0).unwrap(),
+            pin: chip.request(format!("gpioM_{}",pin_num).as_str(), gpio::RequestFlags::OUTPUT,  pin_num, 0).unwrap(),
             u_s: Duration::from_micros(1),
             launch_interval: 0.0,
             interval: 0.0,
