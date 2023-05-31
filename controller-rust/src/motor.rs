@@ -72,12 +72,12 @@ impl Motor {
                 return false;
             }
         } else {
-            self.stop().await;
+            self.stop();
             return true;
         }
         
     }
-    async fn stop(&mut self) {
+    fn stop(&mut self) {
         while self.sleep <= (self.launch_interval as u32)*self.u_s {
             self.pin.set(255).unwrap();
             sleep(self.sleep/2);
