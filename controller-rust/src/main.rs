@@ -29,7 +29,7 @@ async fn main() {
 		]),
 		stops: HashMap::from([
 			(1,Arc::new(Mutex::new(gpiochip3.request("gpioB", gpio::RequestFlags::OUTPUT, 30, 1).unwrap()))),
-			(2,Arc::new(Mutex::new(gpiochip3.request("gpioB", gpio::RequestFlags::OUTPUT, 29, 1).unwrap()))),
+			(2,Arc::new(Mutex::new(gpiochip3.request("gpioB", gpio::RequestFlags::OUTPUT, 26, 1).unwrap()))),
 		]),
 	};
 	
