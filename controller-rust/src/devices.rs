@@ -1,3 +1,4 @@
+extern crate gpiochip as gpio;
 use crate::motor::Motor;
 
 use std::{
@@ -10,5 +11,5 @@ use tokio::sync::Mutex;
 #[derive(Clone)]
 pub struct Devices {
 	pub motors: HashMap<u8, Arc<Mutex<Motor>>>,
-	pub stops: HashMap<u8, Arc<Mutex<bool>>>,
+	pub stops: HashMap<u8, Arc<Mutex<gpio::GpioHandle>>>,
 }

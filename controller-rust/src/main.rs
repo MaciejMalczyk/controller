@@ -25,11 +25,11 @@ async fn main() {
 	let dev = devices::Devices {
 		motors: HashMap::from([
 			(1,Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0)))),
-			(2,Arc::new(Mutex::new(Motor::init(&gpiochip3, 27, 1.0)))),
+			(2,Arc::new(Mutex::new(Motor::init(&gpiochip3, 25, 1.0)))),
 		]),
 		stops: HashMap::from([
-			(1,Arc::new(Mutex::new(true))),
-			(2,Arc::new(Mutex::new(true))),
+			(1,Arc::new(Mutex::new(gpiochip3.request("gpioB", gpio::RequestFlags::OUTPUT, 30, 1).unwrap()))),
+			(2,Arc::new(Mutex::new(gpiochip3.request("gpioB", gpio::RequestFlags::OUTPUT, 29, 1).unwrap()))),
 		]),
 	};
 	

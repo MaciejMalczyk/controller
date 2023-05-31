@@ -94,7 +94,9 @@ impl WsServer {
                                                 println!("Motor {:?} start", message.motor);
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
+                                                    let stop_clone = devices.stops.get(&message.motor).expect("REASON").clone();
                                                     async move {
+                                                        stop_clone.lock().await.set(0).unwrap();
                                                         motor_clone.lock().await.enable();
                                                         loop {
                                                             let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
@@ -109,9 +111,11 @@ impl WsServer {
                                                 println!("Motor {:?} stop", message.motor);
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
+                                                    let stop_clone = devices.stops.get(&message.motor).expect("REASON").clone();
                                                     async move {
                                                         let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
                                                         motor_guard.disable();
+                                                        stop_clone.lock().await.set(1).unwrap();
                                                     }
                                                 });
                                             },
