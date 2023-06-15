@@ -1,5 +1,5 @@
 //use futures_channel::mpsc::{unbounded, UnboundedSender};
-use futures_util::{StreamExt};
+use futures_util::{StreamExt, SinkExt};
 
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::tungstenite::protocol::Message;
@@ -60,7 +60,7 @@ impl WsServer {
         
         
         async fn connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr, mut devices: Devices) {
-                //listen for connection
+            //listen for connection
             println!("New connection: {}", addr);
             
             //await handshake of websocket connection
@@ -73,7 +73,7 @@ impl WsServer {
             
             let (tx, _rx) = unbounded_channel::<Message>();
             peer_map.lock().await.insert(addr, tx);
-            let (_out, mut inc) = websocket_stream.split();
+            let (mut out, mut inc) = websocket_stream.split();
             
             let _listener_task = task::spawn({
                 async move {
@@ -126,6 +126,9 @@ impl WsServer {
                                                         motor_clone.lock().await.set_speed(message.speed);
                                                     }
                                                 });
+                                            },
+                                            "ping" => {
+                                                out.send(Message::Text("pong".to_string())).await.ok();
                                             },
                                             &_ => {
                                                 break;
