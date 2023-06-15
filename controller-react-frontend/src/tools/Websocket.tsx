@@ -4,6 +4,9 @@ class Websocket {
     constructor(address: string) {
         this.ws = new WebSocket(`ws://${address}`);
         this.start();
+        setInterval(()=>{
+            this.ws.send("ping");
+        },2000);
     }
     
     start() {

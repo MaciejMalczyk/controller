@@ -1,7 +1,7 @@
 #MainGrid {
     display: grid;
-    grid-template-columns: 224fr 64px 1568fr 64fr;
-    grid-template-rows: 64fr 952fr 64fr;
+    grid-template-columns: max(224px) 64px min-content 64fr;
+    grid-template-rows: 32fr 655fr;
 }
 #Switches {
     grid-column: 1/2;

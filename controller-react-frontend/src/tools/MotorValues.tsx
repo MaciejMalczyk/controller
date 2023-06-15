@@ -1,5 +1,7 @@
-let MotorValues: { [key: string]: number } = {
-    vel1: 0,
-    vel2: 0,
+import StateNumber from '../tools/StateNumber';
+
+let MotorValues: { [key: string]: StateNumber } = {
+    vel1: new StateNumber(0),
+    vel2: new StateNumber(0),
 }
 export default MotorValues;

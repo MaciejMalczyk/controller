@@ -1,0 +1,31 @@
+.Slider {
+    height: 100%;
+}
+.SliderTrackGrid {
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+.SliderTrack {
+    height: 100%;
+    width: 64px;
+    background-color: #373737;
+    grid-column: 2/3;
+    -webkit-user-drag: none;
+    grid-row: 1/2;
+}
+.SliderHid {
+    position: absolute;
+    width: 192px;
+    height: 80px;
+    background-color: #656565;
+    border-radius: 32px;
+    cursor: grab;
+    grid-column: 1/4;
+}
+.SliderTrackValue {
+    cursor: grabbing;
+    grid-column: 1/4;
+    position: absolute;
+    grid-row: 1/2;
+}
