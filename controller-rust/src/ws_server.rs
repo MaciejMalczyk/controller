@@ -34,9 +34,9 @@ pub struct WsServer {
 
 #[derive(Deserialize, Debug)]
 struct MotorMsg {
-    motor: u8,
     action: String,
-    speed: f32,
+    motor: Option<u8>,
+    speed: Option<f32>,
 }
 
 impl WsServer {
@@ -93,8 +93,8 @@ impl WsServer {
                                             "start" => {
                                                 println!("Motor {:?} start", message.motor);
                                                 task::spawn({
-                                                    let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
-                                                    let stop_clone = devices.stops.get(&message.motor).expect("REASON").clone();
+                                                    let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
+                                                    let stop_clone = devices.stops.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
                                                         stop_clone.lock().await.set(0).unwrap();
                                                         motor_clone.lock().await.enable();
@@ -111,7 +111,7 @@ impl WsServer {
                                             "stop" => {
                                                 println!("Motor {:?} stop", message.motor);
                                                 task::spawn({
-                                                    let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
+                                                    let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
                                                         let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
                                                         motor_guard.disable();
@@ -119,17 +119,17 @@ impl WsServer {
                                                 });
                                             },
                                             "speed" => {
-                                                println!("Motor {:?} speed set to {}", message.motor, message.speed);
+                                                println!("Motor {:?} speed set to {}", message.motor, message.speed.unwrap());
                                                 task::spawn({
-                                                    let motor_clone = devices.motors.get_mut(&message.motor).expect("REASON").clone();
+                                                    let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
-                                                        motor_clone.lock().await.set_speed(message.speed);
+                                                        motor_clone.lock().await.set_speed(message.speed.unwrap());
                                                     }
                                                 });
                                             },
                                             "ping" => {
                                                 out.send(Message::Text("pong".to_string())).await.ok();
-                                            },
+                                            }
                                             &_ => {
                                                 break;
                                             }
