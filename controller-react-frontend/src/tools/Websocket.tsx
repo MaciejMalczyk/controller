@@ -5,7 +5,7 @@ class Websocket {
         this.ws = new WebSocket(`ws://${address}`);
         this.start();
         setInterval(()=>{
-            this.ws.send("ping");
+            this.ws.send({action: "ping"});
         },2000);
     }
     
