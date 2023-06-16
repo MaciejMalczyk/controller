@@ -122,7 +122,7 @@ impl WsServer {
                                             "speed" => {
                                                 println!("Motor {:?} speed set to {}", message.motor.unwrap(), message.speed.unwrap());
                                                 let info = json!({"action": "info", "motor": message.motor.unwrap(), "speed": message.speed.unwrap()});
-                                                out.send(Message::Text(serde_json::to_string_pretty(&info).unwrap())).await.ok();
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
