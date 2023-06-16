@@ -19,7 +19,7 @@ class Websocket {
         }
         
         this.ws.onmessage = (data) => {
-            console.log(JSON.stringify(data));
+            console.log(JSON.stringify(data.data.action));
         }
         this.ws.onclose = () => {
             setTimeout(()=>{ 
