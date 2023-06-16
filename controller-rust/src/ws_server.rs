@@ -93,6 +93,8 @@ impl WsServer {
                                         match action {
                                             "start" => {
                                                 println!("Motor {:?} start", message.motor.unwrap());
+                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": "start"});
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     let stop_clone = devices.stops.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
@@ -111,6 +113,8 @@ impl WsServer {
                                             },
                                             "stop" => {
                                                 println!("Motor {:?} stop", message.motor.unwrap());
+                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": "stop"});
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
