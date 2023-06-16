@@ -23,6 +23,7 @@ use std::{
 };
 
 use serde::Deserialize;
+use serde_json::json;
 
 use crate::devices::{ Devices };
 
@@ -91,7 +92,7 @@ impl WsServer {
                                         let action = message.action.as_str();
                                         match action {
                                             "start" => {
-                                                println!("Motor {:?} start", message.motor);
+                                                println!("Motor {:?} start", message.motor.unwrap());
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     let stop_clone = devices.stops.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
@@ -109,7 +110,7 @@ impl WsServer {
                                                 });
                                             },
                                             "stop" => {
-                                                println!("Motor {:?} stop", message.motor);
+                                                println!("Motor {:?} stop", message.motor.unwrap());
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
@@ -119,7 +120,9 @@ impl WsServer {
                                                 });
                                             },
                                             "speed" => {
-                                                println!("Motor {:?} speed set to {}", message.motor, message.speed.unwrap());
+                                                println!("Motor {:?} speed set to {}", message.motor.unwrap(), message.speed.unwrap());
+                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "speed": message.speed.unwrap()});
+                                                out.send(Message::Text(serde_json::to_string_pretty(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
