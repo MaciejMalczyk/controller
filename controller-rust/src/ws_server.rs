@@ -131,7 +131,8 @@ impl WsServer {
                                                 });
                                             },
                                             "ping" => {
-                                                out.send(Message::Text("pong".to_string())).await.ok();
+                                                let info = json!({"action": "pong"});
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             }
                                             &_ => {
                                                 break;
