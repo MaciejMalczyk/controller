@@ -94,14 +94,13 @@ impl WsServer {
                                         match action {
                                             "start" => {
                                                 println!("Motor {:?} start", message.motor.unwrap());
+                                                *devices.status.get_mut(&message.motor.unwrap()).unwrap() = true;
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     let stop_clone = devices.stops.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
-                                                    let status_clone = devices.status.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
                                                         stop_clone.lock().await.set(0).unwrap();
                                                         motor_clone.lock().await.enable();
-                                                        *status_clone.lock().await = true;
                                                         loop {
                                                             let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
                                                             if motor_guard.step().await == true {
@@ -111,7 +110,7 @@ impl WsServer {
                                                         }
                                                     }
                                                 });
-                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": "start"});
+                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": devices.status[&message.motor.unwrap()]});
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             },
                                             "stop" => {
