@@ -12,7 +12,7 @@ use tokio::sync::Mutex;
 pub struct Devices {
 	pub motors: HashMap<u8, Arc<Mutex<Motor>>>,
 	pub stops: HashMap<u8, Arc<Mutex<gpio::GpioHandle>>>,
-	pub speed: HashMap<u8, f64>,
+	pub speed: HashMap<u8, f32>,
 	pub status: HashMap<u8, bool>,
 	pub pumps: i8,
 	pub lights: i8,
