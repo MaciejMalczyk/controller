@@ -99,6 +99,7 @@ impl WsServer {
                                                     async move {
                                                         motor_clone.stop.lock().await.set(0).unwrap();
                                                         motor_clone.handle.lock().await.enable();
+                                                        *motor_clone.enabled.lock().await = true;
                                                         loop {
                                                             let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                             if motor_guard.step().await == true {
@@ -114,6 +115,7 @@ impl WsServer {
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
+                                                        *motor_clone.enabled.lock().await = false;
                                                         let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                         motor_guard.disable();
                                                     }
@@ -125,6 +127,7 @@ impl WsServer {
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
                                                         motor_clone.handle.lock().await.set_speed(message.speed.unwrap());
+                                                        *motor_clone.speed.lock().await = message.speed.unwrap();
                                                     }
                                                 });
                                             },
