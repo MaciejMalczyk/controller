@@ -143,7 +143,10 @@ impl WsServer {
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             }
                                             "state" => {
-                                                out.send(Message::Text(serde_json::to_string(&devices.status).unwrap())).await.ok();
+                                                let info = json!({"status": serde_json::to_string(&devices.status).unwrap(),
+                                                                  "speed": serde_json::to_string(&devices.speed).unwrap()}
+                                                );
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             }
                                             &_ => {
                                                 break;
