@@ -24,24 +24,43 @@ async fn main() {
 	
 	let dev = devices::Devices {
 		motors: HashMap::from([
-			(1,Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0)))),
-			(2,Arc::new(Mutex::new(Motor::init(&gpiochip3, 25, 1.0)))),
-		]),
-		stops: HashMap::from([
-			(1,Arc::new(Mutex::new(gpiochip3.request("gpioS_1", gpio::RequestFlags::OUTPUT, 30, 1).unwrap()))),
-			(2,Arc::new(Mutex::new(gpiochip3.request("gpioS_2", gpio::RequestFlags::OUTPUT, 29, 1).unwrap()))),
-		]),
-		speed: HashMap::from([
-			(1, 0.0),
-			(2, 0.0),
-		]),
-		status: HashMap::from([
-			(1, false),
-			(2, false),
+			(1, devices::MotorInstance {
+				handle: Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0))),
+				speed: Arc::new(Mutex::new(0.0)),
+				enabled: Arc::new(Mutex::new(false)),
+				stop: Arc::new(Mutex::new(gpiochip3.request("gpioS_1", gpio::RequestFlags::OUTPUT, 30, 1).unwrap())),
+			}),
+			(2, devices::MotorInstance {
+				handle: Arc::new(Mutex::new(Motor::init(&gpiochip3, 25, 1.0))),
+				speed: Arc::new(Mutex::new(0.0)),
+				enabled: Arc::new(Mutex::new(false)),
+				stop: Arc::new(Mutex::new(gpiochip3.request("gpioS_1", gpio::RequestFlags::OUTPUT, 29, 1).unwrap())),
+			}),
 		]),
 		pumps: 0,
 		lights: 0,
 	};
+	
+	// let dev = devices::Devices {
+	// 	motors: HashMap::from([
+	// 		(1,Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0)))),
+	// 		(2,Arc::new(Mutex::new(Motor::init(&gpiochip3, 25, 1.0)))),
+	// 	]),
+	// 	stops: HashMap::from([
+	// 		(1,Arc::new(Mutex::new(gpiochip3.request("gpioS_1", gpio::RequestFlags::OUTPUT, 30, 1).unwrap()))),
+	// 		(2,Arc::new(Mutex::new(gpiochip3.request("gpioS_2", gpio::RequestFlags::OUTPUT, 29, 1).unwrap()))),
+	// 	]),
+	// 	speed: HashMap::from([
+	// 		(1, 0.0),
+	// 		(2, 0.0),
+	// 	]),
+	// 	status: HashMap::from([
+	// 		(1, false),
+	// 		(2, false),
+	// 	]),
+	// 	pumps: 0,
+	// 	lights: 0,
+	// };
 	
 	
 	let state = ws_server::PeerMap::new(Mutex::new(HashMap::new()));

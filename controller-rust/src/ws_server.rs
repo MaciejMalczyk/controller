@@ -94,19 +94,15 @@ impl WsServer {
                                         match action {
                                             "start" => {
                                                 println!("Motor {:?} start", message.motor.unwrap());
-                                                *devices.status.get_mut(&message.motor.unwrap()).unwrap() = true;
-                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": devices.status[&message.motor.unwrap()]});
-                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
-                                                    let stop_clone = devices.stops.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
-                                                        stop_clone.lock().await.set(0).unwrap();
-                                                        motor_clone.lock().await.enable();
+                                                        motor_clone.stop.lock().await.set(0).unwrap();
+                                                        motor_clone.handle.lock().await.enable();
                                                         loop {
-                                                            let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
+                                                            let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                             if motor_guard.step().await == true {
-                                                                stop_clone.lock().await.set(1).unwrap();
+                                                                motor_clone.stop.lock().await.set(1).unwrap();
                                                                 break;
                                                             }
                                                         }
@@ -115,26 +111,20 @@ impl WsServer {
                                             },
                                             "stop" => {
                                                 println!("Motor {:?} stop", message.motor.unwrap());
-                                                *devices.status.get_mut(&message.motor.unwrap()).unwrap() = false;
-                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": devices.status[&message.motor.unwrap()]});
-                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
-                                                        let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
+                                                        let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                         motor_guard.disable();
                                                     }
                                                 });
                                             },
                                             "speed" => {
                                                 println!("Motor {:?} speed set to {}", message.motor.unwrap(), message.speed.unwrap());
-                                                *devices.speed.get_mut(&message.motor.unwrap()).unwrap() = message.speed.unwrap();
-                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "speed": devices.speed[&message.motor.unwrap()]});
-                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
-                                                        motor_clone.lock().await.set_speed(message.speed.unwrap());
+                                                        motor_clone.handle.lock().await.set_speed(message.speed.unwrap());
                                                     }
                                                 });
                                             },
@@ -143,10 +133,6 @@ impl WsServer {
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             }
                                             "state" => {
-                                                let info = json!({"status": serde_json::to_string(&devices.status).unwrap(),
-                                                                  "speed": serde_json::to_string(&devices.speed).unwrap()}
-                                                );
-                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             }
                                             &_ => {
                                                 break;
