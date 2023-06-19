@@ -137,7 +137,7 @@ impl WsServer {
                                             }
                                             "state" => {
                                                 for (_,val) in devices.motors.iter_mut() {
-                                                    println!("{:?}", val.speed);
+                                                    println!("{:?}", val.speed.unwrap());
                                                 }
                                             }
                                             &_ => {
