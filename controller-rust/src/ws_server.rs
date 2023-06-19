@@ -133,6 +133,9 @@ impl WsServer {
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             }
                                             "state" => {
+                                                for (_,val) in devices.motors.iter_mut() {
+                                                    println!("{:?}", val.speed);
+                                                }
                                             }
                                             &_ => {
                                                 break;
