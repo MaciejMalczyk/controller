@@ -31,6 +31,16 @@ async fn main() {
 			(1,Arc::new(Mutex::new(gpiochip3.request("gpioS_1", gpio::RequestFlags::OUTPUT, 30, 1).unwrap()))),
 			(2,Arc::new(Mutex::new(gpiochip3.request("gpioS_2", gpio::RequestFlags::OUTPUT, 29, 1).unwrap()))),
 		]),
+		speed: HashMap::from([
+			(1, Arc::new(Mutex::new(0.0))),
+			(2, Arc::new(Mutex::new(0.0))),
+		]),
+		status: HashMap::from([
+			(1, Arc::new(Mutex::new(false))),
+			(2, Arc::new(Mutex::new(false))),
+		]),
+		pumps: 0,
+		lights: 0,
 	};
 	
 	

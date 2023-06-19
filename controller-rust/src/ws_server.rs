@@ -52,6 +52,7 @@ impl WsServer {
         let addr = ("0.0.0.0:8080").to_string();
         let try_socket = TcpListener::bind(&addr).await;
         let listener = try_socket.expect("Failed to bind");
+        
         println!("Listening on: {}", addr);
 
         // Let's spawn the handling of each connection in a separate task.
@@ -93,14 +94,14 @@ impl WsServer {
                                         match action {
                                             "start" => {
                                                 println!("Motor {:?} start", message.motor.unwrap());
-                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": "start"});
-                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 task::spawn({
                                                     let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     let stop_clone = devices.stops.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
+                                                    let status_clone = devices.status.get(&message.motor.as_ref().unwrap()).expect("REASON").clone();
                                                     async move {
                                                         stop_clone.lock().await.set(0).unwrap();
                                                         motor_clone.lock().await.enable();
+                                                        *status_clone.lock().await = true;
                                                         loop {
                                                             let mut motor_guard = MutexGuard::map(motor_clone.lock().await, |f| f);
                                                             if motor_guard.step().await == true {
@@ -110,6 +111,8 @@ impl WsServer {
                                                         }
                                                     }
                                                 });
+                                                let info = json!({"action": "info", "motor": message.motor.unwrap(), "state": "start"});
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             },
                                             "stop" => {
                                                 println!("Motor {:?} stop", message.motor.unwrap());
@@ -137,6 +140,8 @@ impl WsServer {
                                             "ping" => {
                                                 let info = json!({"action": "pong"});
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
+                                            }
+                                            "state" => {
                                             }
                                             &_ => {
                                                 break;
