@@ -136,8 +136,13 @@ impl WsServer {
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             }
                                             "state" => {
-                                                for (_,val) in devices.motors.iter_mut() {
-                                                    println!("{:?}", val.clone().speed.lock().await);
+                                                for (n,val) in devices.motors.iter_mut() {
+                                                    let info = json!({
+                                                        "motor": n,
+                                                        "speed": *val.clone().speed.lock().await,
+                                                        "enabled": *val.clone().speed.lock().await,
+                                                    });
+                                                    out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
                                             }
                                             &_ => {
