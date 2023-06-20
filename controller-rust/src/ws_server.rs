@@ -138,6 +138,7 @@ impl WsServer {
                                             "state" => {
                                                 for (n,val) in devices.motors.iter_mut() {
                                                     let info = json!({
+                                                        "action": "state",
                                                         "motor": n,
                                                         "speed": *val.clone().speed.lock().await,
                                                         "enabled": *val.clone().enabled.lock().await,

@@ -19,8 +19,8 @@ class Websocket {
             this.send({action: "state"});
         }
         
-        this.ws.onmessage = (data) => {
-            console.log(JSON.parse(data.data));
+        this.ws.onmessage = (msg) => {
+            console.log(JSON.parse(msg.data));
         }
         this.ws.onclose = () => {
             setTimeout(()=>{ 
