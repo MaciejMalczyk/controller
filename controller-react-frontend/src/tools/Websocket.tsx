@@ -5,7 +5,7 @@ class Websocket {
         this.ws = new WebSocket(`ws://${address}`);
         this.start();
         setInterval(()=>{
-            this.send({action: "state"});
+//             this.send({action: "state"});
         },2000);
     }
     
@@ -16,6 +16,7 @@ class Websocket {
         
         this.ws.onopen = () => {
             //console.log("ws open");
+            this.send({action: "state"});
         }
         
         this.ws.onmessage = (data) => {

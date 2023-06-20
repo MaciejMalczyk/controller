@@ -140,7 +140,7 @@ impl WsServer {
                                                     let info = json!({
                                                         "motor": n,
                                                         "speed": *val.clone().speed.lock().await,
-                                                        "enabled": *val.clone().speed.lock().await,
+                                                        "enabled": *val.clone().enabled.lock().await,
                                                     });
                                                     out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
