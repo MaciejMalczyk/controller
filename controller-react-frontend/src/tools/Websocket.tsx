@@ -1,12 +1,11 @@
+import MotorValues from '../tools/MotorValues';
+
 class Websocket {
     ws: WebSocket;
     
     constructor(address: string) {
         this.ws = new WebSocket(`ws://${address}`);
         this.start();
-        setInterval(()=>{
-//             this.send({action: "state"});
-        },2000);
     }
     
     start() {
@@ -20,7 +19,16 @@ class Websocket {
         }
         
         this.ws.onmessage = (msg) => {
-            console.log(JSON.parse(msg.data));
+            let data = JSON.parse(msg.data);
+            console.log(data);
+            if (data.action === "state") {
+                Object.keys(MotorValues).forEach((it) => {
+                    if (it === `${data.motor}`) {
+                        MotorValues[Number(it)].velocity.setValue(Math.round(data.speed*10)/10);
+                        MotorValues[Number(it)].enabled.setValue(Number(data.enabled));
+                    }
+                })
+            }
         }
         this.ws.onclose = () => {
             setTimeout(()=>{ 

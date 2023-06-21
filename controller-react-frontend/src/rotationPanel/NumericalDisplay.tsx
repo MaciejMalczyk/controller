@@ -6,7 +6,7 @@ interface NumDisplayProps {
     config: {
         backgroundColor?: string,
         fontColor?: string,
-        variable?: string,
+        variable?: number,
     }
 }
 
@@ -15,11 +15,11 @@ const NumDisplay = ( props: NumDisplayProps ) => {
     let pass: {
         backgroundColor?: string,
         fontColor?: string,
-        variable: string,
+        variable: number,
     } = {
         backgroundColor: props.config.backgroundColor || "#373737",
         fontColor: props.config.fontColor || "#ffffff",
-        variable: props.config.variable || "999",
+        variable: props.config.variable || 999,
     }
     
     
@@ -27,9 +27,9 @@ const NumDisplay = ( props: NumDisplayProps ) => {
     const NumDisplayValueRef: RefObject<HTMLDivElement> = createRef();
     
     useEffect(() => {
-        window.addEventListener(MotorValues[pass.variable].event, () => {
+        window.addEventListener(MotorValues[pass.variable].velocity.event, () => {
             if (NumDisplayValueRef.current) {
-                NumDisplayValueRef.current!.innerText = `${MotorValues[pass.variable].value}`;
+                NumDisplayValueRef.current!.innerText = `${MotorValues[pass.variable].velocity.value}`;
             }
         });
         if (pass.backgroundColor) {

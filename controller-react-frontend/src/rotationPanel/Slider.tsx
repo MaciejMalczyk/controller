@@ -4,7 +4,7 @@ import MotorValues from '../tools/MotorValues';
 
 interface SliderProps {
     config: {
-        variable: string,
+        variable: number,
         maxValue: number,
     }
 }
@@ -12,7 +12,7 @@ interface SliderProps {
 const Slider = ( props: SliderProps ) => {
     
     let pass: {
-        variable: string,
+        variable: number,
         maxValue: number,
     } = {
         variable: props.config.variable,
@@ -46,7 +46,7 @@ const Slider = ( props: SliderProps ) => {
             if (el.offsetY >= 40 && el.offsetY <= height+40) {
                 SliderHidRef.current!.style.marginTop = position;
                 let sliderVal = SliderHidRef.current!.style.marginTop;
-                MotorValues[pass.variable].setValue(Math.round(((height - (parseInt(sliderVal)))*pass.maxValue/height)*10)/10);
+                MotorValues[pass.variable].velocity.setValue(Math.round(((height - (parseInt(sliderVal)))*pass.maxValue/height)*10)/10);
             }
         });
         

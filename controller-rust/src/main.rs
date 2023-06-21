@@ -20,21 +20,21 @@ use tokio::{
 #[tokio::main]
 async fn main() {
 	
-	let gpiochip3 = gpio::GpioChip::new("/dev/gpiochip3").unwrap();
+	let gpiochip0 = gpio::GpioChip::new("/dev/gpiochip0").unwrap();
 	
 	let dev = devices::Devices {
 		motors: HashMap::from([
 			(1, devices::MotorInstance {
-				handle: Arc::new(Mutex::new(Motor::init(&gpiochip3, 31, 1.0))),
+				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 13, 1.0))),
 				speed: Arc::new(Mutex::new(0.0)),
 				enabled: Arc::new(Mutex::new(false)),
-				stop: Arc::new(Mutex::new(gpiochip3.request("gpioS_1", gpio::RequestFlags::OUTPUT, 30, 1).unwrap())),
+				stop: Arc::new(Mutex::new(gpiochip0.request("gpioS_1", gpio::RequestFlags::OUTPUT, 26, 1).unwrap())),
 			}),
 			(2, devices::MotorInstance {
-				handle: Arc::new(Mutex::new(Motor::init(&gpiochip3, 25, 1.0))),
+				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 16, 1.0))),
 				speed: Arc::new(Mutex::new(0.0)),
 				enabled: Arc::new(Mutex::new(false)),
-				stop: Arc::new(Mutex::new(gpiochip3.request("gpioS_1", gpio::RequestFlags::OUTPUT, 29, 1).unwrap())),
+				stop: Arc::new(Mutex::new(gpiochip0.request("gpioS_1", gpio::RequestFlags::OUTPUT, 21, 1).unwrap())),
 			}),
 		]),
 		pumps: 0,
