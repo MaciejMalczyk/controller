@@ -1,5 +1,5 @@
 {
     "motor1_max_speed": 2,
     "motor2_max_speed": 2,
-    "backend_addr": "rockpro64.local:8080"
+    "backend_addr": "clinostate.local:8080"
 }
