@@ -38,7 +38,6 @@ struct MotorMsg {
     action: String,
     motor: Option<u8>,
     speed: Option<f32>,
-    data: Option<String>,
 }
 
 impl WsServer {
@@ -148,7 +147,7 @@ impl WsServer {
                                                 }
                                             }
                                             "sensors" => {
-                                                println!("Sensors data: {:?}", message.data)
+                                                println!("Sensors data: {:?}", message)
                                             }
                                             &_ => {
                                                 break;
