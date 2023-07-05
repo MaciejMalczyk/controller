@@ -38,6 +38,7 @@ struct MotorMsg {
     action: String,
     motor: Option<u8>,
     speed: Option<f32>,
+    data: Option<String>,
 }
 
 impl WsServer {
