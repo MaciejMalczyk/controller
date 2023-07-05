@@ -146,6 +146,9 @@ impl WsServer {
                                                     out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
                                             }
+                                            "sensors" => {
+                                                println!("Sensors data: {:?}", message.data)
+                                            }
                                             &_ => {
                                                 break;
                                             }
