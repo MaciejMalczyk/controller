@@ -23,7 +23,7 @@ use std::{
 };
 
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{ json, Value, Value::{ Object } };
 
 use crate::devices::{ Devices };
 
@@ -36,8 +36,7 @@ pub struct WsServer {
 #[derive(Deserialize, Debug)]
 struct MotorMsg {
     action: String,
-    motor: Option<u8>,
-    speed: Option<f32>,
+    data: Option<Value>,
 }
 
 impl WsServer {
@@ -92,66 +91,56 @@ impl WsServer {
                                         let message: MotorMsg = serde_json::from_str(&msg.unwrap().to_text().unwrap()).unwrap();
                                         let action = message.action.as_str();
                                         match action {
-                                            "start" => {
-                                                println!("Motor {:?} start", message.motor.unwrap());
-                                                task::spawn({
-                                                    let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
-                                                    async move {
-                                                        motor_clone.stop.lock().await.set(0).unwrap();
-                                                        motor_clone.handle.lock().await.enable();
-                                                        *motor_clone.enabled.lock().await = true;
-                                                        loop {
-                                                            let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
-                                                            if motor_guard.step().await == true {
-                                                                motor_clone.stop.lock().await.set(1).unwrap();
-                                                                break;
-                                                            }
+                                            "motors" => {
+                                                let data = message.data.unwrap();
+                                                println!("{:?}", data);
+                                                let mut enable: [bool; 2] = [false, false];
+                                                let mut speed: [f64; 2] = [0.0, 0.0];
+                                                for (k, v) in data.as_object().unwrap() {
+                                                    let mut iter = 0;
+                                                    for i in v.as_array().unwrap() {
+                                                        println!("{:?}; {:?}", k, i);
+                                                        if k == "enable" {
+                                                            enable[iter] = i.as_bool().unwrap();
+                                                            iter += 1;
+                                                        } else if k == "speed" {
+                                                            speed[iter] = i.as_f64().unwrap();
+                                                            iter += 1;
                                                         }
                                                     }
-                                                });
-                                            },
-                                            "stop" => {
-                                                println!("Motor {:?} stop", message.motor.unwrap());
-                                                task::spawn({
-                                                    let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
-                                                    async move {
-                                                        *motor_clone.enabled.lock().await = false;
-                                                        let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
-                                                        motor_guard.disable();
-                                                    }
-                                                });
-                                            },
-                                            "speed" => {
-                                                println!("Motor {:?} speed set to {}", message.motor.unwrap(), message.speed.unwrap());
-                                                task::spawn({
-                                                    let motor_clone = devices.motors.get_mut(&message.motor.as_ref().unwrap()).expect("REASON").clone();
-                                                    async move {
-                                                        motor_clone.handle.lock().await.set_speed(message.speed.unwrap());
-                                                        *motor_clone.speed.lock().await = message.speed.unwrap();
-                                                    }
-                                                });
-                                            },
-                                            "ping" => {
-                                                let info = json!({"action": "pong"});
-                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
-                                            }
-                                            "state" => {
-                                                for (n,val) in devices.motors.iter_mut() {
-                                                    let info = json!({
-                                                        "action": "state",
-                                                        "motor": n,
-                                                        "speed": *val.clone().speed.lock().await,
-                                                        "enabled": *val.clone().enabled.lock().await,
-                                                    });
-                                                    out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
-                                            }
-                                            "sensors" => {
-                                                println!("Sensors data: {:?}", message)
-                                            }
-                                            &_ => {
-                                                break;
-                                            }
+                                                for (id, val) in enable.iter().enumerate() {
+                                                    if val == &true {
+                                                        task::spawn({
+                                                            let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
+                                                            async move {
+                                                                motor_clone.handle.lock().await.set_speed(speed[id]);
+                                                                // *motor_clone.speed.lock().await = speed[id];
+                                                                motor_clone.stop.lock().await.set(0).unwrap();
+                                                                motor_clone.handle.lock().await.enable();
+                                                                // *motor_clone.enabled.lock().await = true;
+                                                                loop {
+                                                                    let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
+                                                                    if motor_guard.step().await == true {
+                                                                        motor_clone.stop.lock().await.set(1).unwrap();
+                                                                        break;
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
+                                                    } else if val == &false {
+                                                        task::spawn({
+                                                            let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
+                                                            async move {
+                                                                *motor_clone.enabled.lock().await = false;
+                                                                let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
+                                                                motor_guard.disable();
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            },
+                                            &_ => break
                                         }
                                     }
                                     None => break,

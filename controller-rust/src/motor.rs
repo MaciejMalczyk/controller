@@ -12,18 +12,18 @@ pub struct Motor {
     pub disable: bool,
     pin: gpio::GpioHandle,
     u_s: Duration,
-    launch_interval: f32,
-    interval: f32,
+    launch_interval: f64,
+    interval: f64,
     sleep: Duration,
-    freq: f32,
-    second: f32,
-    steps_per_rot: f32,
+    freq: f64,
+    second: f64,
+    steps_per_rot: f64,
     
     
 }
 
 impl Motor {
-    pub fn init(chip: &gpio::GpioChip, pin_num: u32, rot_per_s: f32) -> Motor {
+    pub fn init(chip: &gpio::GpioChip, pin_num: u32, rot_per_s: f64) -> Motor {
         let mut m = Motor { 
             disable: false,
             pin: chip.request(format!("gpioM_{}",pin_num).as_str(), gpio::RequestFlags::OUTPUT,  pin_num, 0).unwrap(),
@@ -39,7 +39,7 @@ impl Motor {
         m
     }
     
-    pub fn set_speed(&mut self, rot_per_s: f32) {
+    pub fn set_speed(&mut self, rot_per_s: f64) {
         self.freq = self.steps_per_rot*rot_per_s; 
         self.launch_interval = (self.second/(self.steps_per_rot*rot_per_s))*5.0;
         self.interval = self.second/(self.steps_per_rot*rot_per_s);
