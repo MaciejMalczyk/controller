@@ -151,7 +151,10 @@ impl WsServer {
                                                     out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
                                             },
-                                            &_ => println!("???")
+                                            "sensors" => {
+                                                let data = message.data.unwrap();
+                                            }
+                                            &_ => println!("{:?}", message)
                                         }
                                     }
                                     None => break,
