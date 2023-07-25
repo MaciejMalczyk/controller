@@ -10,7 +10,7 @@ w.on('open', function open() {
       let msg = {
         action: "motors",
         data: {
-          enable: [true, true],
+          enable: [false, false],
           speed: [0.5, 0.4]
         }
       }

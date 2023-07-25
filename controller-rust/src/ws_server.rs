@@ -136,7 +136,22 @@ impl WsServer {
                                                 }
                                                 
                                             },
-                                            &_ => break
+                                            "ping" => {
+                                                let info = json!({"action": "pong"});
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
+                                            },
+                                            "state" => {
+                                                for (n,val) in devices.motors.iter_mut() {
+                                                    let info = json!({
+                                                        "action": "state",
+                                                        "motor": n,
+                                                        "speed": *val.clone().speed.lock().await,
+                                                        "enabled": *val.clone().enabled.lock().await,
+                                                    });
+                                                    out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
+                                                }
+                                            },
+                                            &_ => println!("???")
                                         }
                                     }
                                     None => break,

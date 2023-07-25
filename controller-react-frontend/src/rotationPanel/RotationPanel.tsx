@@ -29,17 +29,21 @@ const InfoPanel = () => {
             </div>
             <div className="RotationPanelButtonStart">
                 <Button config={{parentState: isEnabledState, stateConfig: 1, color: "#456454", enableColor: "#00fd7a", onclick: () => {
-                    WebsocketServers[0].send({motor: 1, action: "speed", speed: MotorValues[1].velocity.value});
-                    WebsocketServers[0].send({motor: 2, action: "speed", speed: MotorValues[2].velocity.value});
-                    WebsocketServers[0].send({motor: 1, action: "start" });
-                    WebsocketServers[0].send({motor: 2, action: "start" });
+                    WebsocketServers[0].send({
+                        action: "motors", data: {
+                            enable: [true, true], speed: [MotorValues[1].velocity.value, MotorValues[2].velocity.value]
+                        }
+                    });
                     isEnabledStateSet(1);
                 }}}></Button>
             </div>
             <div className="RotationPanelButtonStop">
                 <Button config={{parentState: isEnabledState, stateConfig: 2, color: "#591515", enableColor: "#ff1a1a", onclick: () => {
-                    WebsocketServers[0].send({motor: 1, action: "stop" });
-                    WebsocketServers[0].send({motor: 2, action: "stop" });
+                    WebsocketServers[0].send({
+                        action: "motors", data: {
+                            enable: [false, false], speed: [MotorValues[1].velocity.value, MotorValues[2].velocity.value]
+                        }
+                    });
                     isEnabledStateSet(2);
                 }}}></Button>
             </div>
