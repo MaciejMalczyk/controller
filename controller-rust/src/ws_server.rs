@@ -93,13 +93,11 @@ impl WsServer {
                                         match action {
                                             "motors" => {
                                                 let data = message.data.unwrap();
-                                                println!("{:?}", data);
                                                 let mut enable: [bool; 2] = [false, false];
                                                 let mut speed: [f64; 2] = [0.0, 0.0];
                                                 for (k, v) in data.as_object().unwrap() {
                                                     let mut iter = 0;
                                                     for i in v.as_array().unwrap() {
-                                                        println!("{:?}; {:?}", k, i);
                                                         if k == "enable" {
                                                             enable[iter] = i.as_bool().unwrap();
                                                             iter += 1;
@@ -115,10 +113,8 @@ impl WsServer {
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             async move {
                                                                 motor_clone.handle.lock().await.set_speed(speed[id]);
-                                                                // *motor_clone.speed.lock().await = speed[id];
                                                                 motor_clone.stop.lock().await.set(0).unwrap();
                                                                 motor_clone.handle.lock().await.enable();
-                                                                // *motor_clone.enabled.lock().await = true;
                                                                 loop {
                                                                     let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                                     if motor_guard.step().await == true {
@@ -132,13 +128,13 @@ impl WsServer {
                                                         task::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             async move {
-                                                                *motor_clone.enabled.lock().await = false;
                                                                 let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                                 motor_guard.disable();
                                                             }
                                                         });
                                                     }
                                                 }
+                                                
                                             },
                                             &_ => break
                                         }
