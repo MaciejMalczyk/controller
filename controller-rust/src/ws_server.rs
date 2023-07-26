@@ -48,11 +48,11 @@ impl WsServer {
     }
     
     pub async fn spawn(&mut self) {
-        let addr = ("0.0.0.0:8080").to_string();
-        let try_socket = TcpListener::bind(&addr).await;
+        let srv_addr = ("0.0.0.0:8080").to_string();
+        let try_socket = TcpListener::bind(&srv_addr).await;
         let listener = try_socket.expect("Failed to bind");
         
-        println!("Listening on: {}", addr);
+        println!("Listening on: {}", srv_addr);
 
         // Let's spawn the handling of each connection in a separate task.
         while let Ok((stream, addr)) = listener.accept().await {
@@ -85,10 +85,16 @@ impl WsServer {
                                     //add spindown for every motor
                                     Some(Err(..)) => {
                                         println!("Connection break");
+                                        peer_map.lock().await.remove(&addr);
                                         break;
                                     },
                                     Some(msg) => {
-                                        let message: MotorMsg = serde_json::from_str(&msg.unwrap().to_text().unwrap()).unwrap();
+                                        let message: MotorMsg = match serde_json::from_str(&msg.unwrap().to_text().unwrap()) {
+                                            Ok(message) => message,
+                                            Err(_) => return {
+                                                peer_map.lock().await.remove(&addr);
+                                            },
+                                        };
                                         let action = message.action.as_str();
                                         match action {
                                             "motors" => {
@@ -103,7 +109,6 @@ impl WsServer {
                                                             iter += 1;
                                                         } else if k == "speed" {
                                                             speed[iter] = i.as_f64().unwrap();
-                                                            iter += 1;
                                                         }
                                                     }
                                                 }
@@ -151,13 +156,13 @@ impl WsServer {
                                                     out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
                                             },
-                                            "sensors" => {
-                                                let data = message.data.unwrap();
+                                            "sensors" => {                                                
                                             }
                                             &_ => println!("{:?}", message)
                                         }
                                     }
-                                    None => break,
+                                    None => {
+                                    }
                                 }
                             }
                         }
