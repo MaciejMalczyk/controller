@@ -23,7 +23,7 @@ use std::{
 };
 
 use serde::Deserialize;
-use serde_json::{ json, Value, Value::{ Object } };
+use serde_json::{ json, Value, Value::Null };
 
 use crate::devices::{ Devices };
 
@@ -117,13 +117,19 @@ impl WsServer {
                                                         task::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             async move {
+                                                                //set rotational speed of motor
                                                                 motor_clone.handle.lock().await.set_speed(speed[id]);
+                                                                //disable physical motor lock on driver
                                                                 motor_clone.stop.lock().await.set(0).unwrap();
+                                                                //enable stepping function
                                                                 motor_clone.handle.lock().await.enable();
                                                                 loop {
+                                                                    //make MutexGuard to motor instance to listen chages of what step returns
                                                                     let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                                     if motor_guard.step().await == true {
+                                                                        //if motor_guard.step() returns true, enable motor lock
                                                                         motor_clone.stop.lock().await.set(1).unwrap();
+                                                                        //break loop
                                                                         break;
                                                                     }
                                                                 }
@@ -154,6 +160,34 @@ impl WsServer {
                                                         "enabled": *val.clone().enabled.lock().await,
                                                     });
                                                     out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
+                                                }
+                                            },
+                                            "lights" => {
+                                                let data = message.data.unwrap();
+                                                println!("{:?}", data["enable"]);
+                                                if data["enable"] == true {
+                                                    task::spawn({
+                                                        let light_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            light_clone.handle.lock().await.enable();
+                                                            loop {
+                                                                let mut light_guard = MutexGuard::map(light_clone.handle.lock().await, |f| f);
+                                                                if light_guard.pwm().await == true {
+                                                                    break;
+                                                                }
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                                if data["enable"] == false {
+                                                    println!("dxx");
+                                                    task::spawn({
+                                                        let light_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            let mut light_guard = MutexGuard::map(light_clone.handle.lock().await, |f| f);
+                                                            light_guard.disable();
+                                                        }
+                                                    });
                                                 }
                                             },
                                             "sensors" => {                                                
