@@ -1,6 +1,8 @@
 extern crate gpiochip as gpio;
 mod motor;
 use crate::motor::Motor;
+mod light;
+use crate::light::Light;
 mod ws_server;
 mod devices;
 
@@ -38,7 +40,11 @@ async fn main() {
 			}),
 		]),
 		pumps: 0,
-		lights: 0,
+		lights: HashMap::from([
+			(0, devices::LightInstance {
+				handle: Arc::new(Mutex::new(Light::init(&gpiochip0, 12, 100, 20))),
+			}),
+		]),
 	};
 	
 	

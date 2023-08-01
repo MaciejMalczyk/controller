@@ -151,8 +151,16 @@ impl WsServer {
                                                     out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
                                             },
-                                            "sensors" => {
+                                            "light" => {
                                                 let data = message.data.unwrap();
+                                                tokio::select! {
+                                                    _ = async {
+                                                        loop {
+                                                            println!("A");
+                                                        }
+                                                    } => {},
+                                                }
+                                                
                                             }
                                             &_ => println!("{:?}", message)
                                         }
