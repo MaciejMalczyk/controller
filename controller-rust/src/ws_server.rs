@@ -23,7 +23,7 @@ use std::{
 };
 
 use serde::Deserialize;
-use serde_json::{ json, Value, Value::Null };
+use serde_json::{ json, Value, Value::{ Object } };
 
 use crate::devices::{ Devices };
 
@@ -48,11 +48,11 @@ impl WsServer {
     }
     
     pub async fn spawn(&mut self) {
-        let srv_addr = ("0.0.0.0:8080").to_string();
-        let try_socket = TcpListener::bind(&srv_addr).await;
+        let addr = ("0.0.0.0:8080").to_string();
+        let try_socket = TcpListener::bind(&addr).await;
         let listener = try_socket.expect("Failed to bind");
         
-        println!("Listening on: {}", srv_addr);
+        println!("Listening on: {}", addr);
 
         // Let's spawn the handling of each connection in a separate task.
         while let Ok((stream, addr)) = listener.accept().await {
@@ -85,16 +85,10 @@ impl WsServer {
                                     //add spindown for every motor
                                     Some(Err(..)) => {
                                         println!("Connection break");
-                                        peer_map.lock().await.remove(&addr);
                                         break;
                                     },
                                     Some(msg) => {
-                                        let message: MotorMsg = match serde_json::from_str(&msg.unwrap().to_text().unwrap()) {
-                                            Ok(message) => message,
-                                            Err(_) => return {
-                                                peer_map.lock().await.remove(&addr);
-                                            },
-                                        };
+                                        let message: MotorMsg = serde_json::from_str(&msg.unwrap().to_text().unwrap()).unwrap();
                                         let action = message.action.as_str();
                                         match action {
                                             "motors" => {
@@ -109,6 +103,7 @@ impl WsServer {
                                                             iter += 1;
                                                         } else if k == "speed" {
                                                             speed[iter] = i.as_f64().unwrap();
+                                                            iter += 1;
                                                         }
                                                     }
                                                 }
@@ -117,19 +112,13 @@ impl WsServer {
                                                         task::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             async move {
-                                                                //set rotational speed of motor
                                                                 motor_clone.handle.lock().await.set_speed(speed[id]);
-                                                                //disable physical motor lock on driver
                                                                 motor_clone.stop.lock().await.set(0).unwrap();
-                                                                //enable stepping function
                                                                 motor_clone.handle.lock().await.enable();
                                                                 loop {
-                                                                    //make MutexGuard to motor instance to listen chages of what step returns
                                                                     let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
                                                                     if motor_guard.step().await == true {
-                                                                        //if motor_guard.step() returns true, enable motor lock
                                                                         motor_clone.stop.lock().await.set(1).unwrap();
-                                                                        //break loop
                                                                         break;
                                                                     }
                                                                 }
@@ -162,41 +151,21 @@ impl WsServer {
                                                     out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                                 }
                                             },
-                                            "lights" => {
+                                            "light" => {
                                                 let data = message.data.unwrap();
-                                                println!("{:?}", data["enable"]);
-                                                if data["enable"] == true {
-                                                    task::spawn({
-                                                        let light_clone = devices.lights.get_mut(&0).expect("REASON").clone();
-                                                        async move {
-                                                            light_clone.handle.lock().await.enable();
-                                                            loop {
-                                                                let mut light_guard = MutexGuard::map(light_clone.handle.lock().await, |f| f);
-                                                                if light_guard.pwm().await == true {
-                                                                    break;
-                                                                }
-                                                            }
+                                                tokio::select! {
+                                                    _ = async {
+                                                        loop {
+                                                            println!("A");
                                                         }
-                                                    });
+                                                    } => {},
                                                 }
-                                                if data["enable"] == false {
-                                                    println!("dxx");
-                                                    task::spawn({
-                                                        let light_clone = devices.lights.get_mut(&0).expect("REASON").clone();
-                                                        async move {
-                                                            let mut light_guard = MutexGuard::map(light_clone.handle.lock().await, |f| f);
-                                                            light_guard.disable();
-                                                        }
-                                                    });
-                                                }
-                                            },
-                                            "sensors" => {                                                
+                                                
                                             }
                                             &_ => println!("{:?}", message)
                                         }
                                     }
-                                    None => {
-                                    }
+                                    None => break,
                                 }
                             }
                         }

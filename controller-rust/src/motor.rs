@@ -1,12 +1,15 @@
 extern crate gpiochip as gpio;
 
+// use tokio::{
+//     time::{sleep, Duration},
+// };
 use std::{
     thread::sleep,
     time::Duration,
 };
 
 pub struct Motor {
-    disable: bool,
+    pub disable: bool,
     pin: gpio::GpioHandle,
     u_s: Duration,
     launch_interval: f64,

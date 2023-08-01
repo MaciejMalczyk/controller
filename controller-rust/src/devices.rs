@@ -23,7 +23,7 @@ pub struct PumpInstance {
 }
 
 #[derive(Clone)]
-pub struct LightsInstance {
+pub struct LightInstance {
 	pub handle: Arc<Mutex<Light>>,
 }
 
@@ -31,5 +31,5 @@ pub struct LightsInstance {
 pub struct Devices {
 	pub motors: HashMap<u8, MotorInstance>,
 	pub pumps: i8,
-	pub lights: HashMap<u8, LightsInstance>,
+	pub lights: HashMap<u8, LightInstance>,
 }

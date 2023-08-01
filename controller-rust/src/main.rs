@@ -41,8 +41,8 @@ async fn main() {
 		]),
 		pumps: 0,
 		lights: HashMap::from([
-			(0, devices::LightsInstance {
-				handle: Arc::new(Mutex::new(Light::init(&gpiochip0, 7, 10, 5))),
+			(0, devices::LightInstance {
+				handle: Arc::new(Mutex::new(Light::init(&gpiochip0, 12, 100, 20))),
 			}),
 		]),
 	};
