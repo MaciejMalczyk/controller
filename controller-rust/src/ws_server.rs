@@ -153,13 +153,22 @@ impl WsServer {
                                             },
                                             "light" => {
                                                 let data = message.data.unwrap();
-                                                tokio::select! {
-                                                    _ = async {
-                                                        loop {
-                                                            println!("A");
+                                                if data == "enable" {
+                                                    task::spawn({
+                                                        let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            l_clone.handle.lock().await.pwm().await;
                                                         }
-                                                    } => {},
+                                                    });
+                                                } else if data == "disable" {
+                                                    task::spawn({
+                                                        let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            l_clone.handle.lock().await.stop().await;
+                                                        }
+                                                    });
                                                 }
+                                                
                                                 
                                             }
                                             &_ => println!("{:?}", message)

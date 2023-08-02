@@ -1,51 +1,50 @@
 extern crate gpiochip as gpio;
 
-use std::{
-    thread::sleep,
-    time::Duration,
-};
+use tokio::time::{sleep, Duration};
+use tokio::sync::{ Mutex };
+use std::sync::Arc;
 
 pub struct Light {
-    pub disable: bool,
-    pin: gpio::GpioHandle,
+    switch: Arc<Mutex<bool>>,
+    pin: Arc<Mutex<gpio::GpioHandle>>,
     freq: u64,
     duty: u64,
-    
-    
 }
 
 impl Light {
-    pub fn init(chip: &gpio::GpioChip, pin_num: u32, freq: u64, duty: u64) -> Light {
-        let mut l = Light { 
-            disable: false,
-            pin: chip.request(format!("gpioM_{}",pin_num).as_str(), gpio::RequestFlags::OUTPUT,  pin_num, 0).unwrap(),
+    pub fn init(chip: &gpio::GpioChip, pin: u32, freq: u64, duty: u64) -> Light {
+        let l = Light {
+            switch: Arc::new(Mutex::new(true)),
+            pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
             freq: freq,
             duty: duty,
-            
         };
         l
     }
-    
-    pub async fn step(&mut self) -> bool {
-        
-        if self.disable == false {
-                println!("A");
-                sleep(Duration::from_millis((1000*self.duty)/self.freq));
-                println!("B");
-                sleep(Duration::from_millis(1000 - (1000*self.duty)/self.freq));
-                return false;
-        } else {
-            return true;
-        }
-        
+    pub async fn pwm(&mut self) {
+        *self.switch.lock().await = true;
+        tokio::spawn({
+            let sw_clone = Arc::clone(&self.switch);
+            let l = 1000000/self.freq;
+            let d = self.duty;
+            let pin_clone = Arc::clone(&self.pin);
+            async move {
+                while *sw_clone.lock().await {
+                    match pin_clone.lock().await.set(255) {
+                        Ok(()) => { println!("ok 255"); },
+                        Err(e) => { println!("{:?}", e); },
+                    }
+                    sleep(Duration::from_micros((d*l)/100)).await;
+                    match pin_clone.lock().await.set(0) {
+                        Ok(()) => { println!("ok 0"); },
+                        Err(e) => { println!("{:?}", e); },
+                    }
+                    sleep(Duration::from_micros(l - (d*l)/100)).await;
+                }
+            }
+        });
     }
-    
-    pub fn disable(&mut self) {
-        self.disable = true;
-        println!("Disabling");
+    pub async fn stop(&mut self) {
+        *self.switch.lock().await = false;
     }
-    
-    pub fn enable(&mut self) {
-        self.disable = false;
-    }
-} 
+}
