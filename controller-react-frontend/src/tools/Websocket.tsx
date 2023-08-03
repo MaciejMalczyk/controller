@@ -2,23 +2,25 @@ import MotorValues from '../tools/MotorValues';
 
 class Websocket {
     ws: WebSocket;
+    address: string;
     
     constructor(address: string) {
-        this.ws = new WebSocket(`ws://${address}`);
-        this.start();
+        this.address = address;
+        this.ws = this.start();
     }
     
     start() {
-        this.ws.onerror = (err) => {
+        let ws = new WebSocket(`ws://${this.address}`);
+        ws.onerror = (err) => {
             console.log(err);
         }
         
-        this.ws.onopen = () => {
+        ws.onopen = () => {
             //console.log("ws open");
             this.send({action: "state"});
         }
         
-        this.ws.onmessage = (msg) => {
+        ws.onmessage = (msg) => {
             let data = JSON.parse(msg.data);
             console.log(data);
             if (data.action === "state") {
@@ -30,11 +32,12 @@ class Websocket {
                 })
             }
         }
-        this.ws.onclose = () => {
-            setTimeout(()=>{ 
+        ws.onclose = () => {
+            setTimeout(()=>{
                 this.start();
             },1000);
         }
+        return ws;
     }
     
     send(obj: object) {
