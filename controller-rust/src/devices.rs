@@ -1,6 +1,7 @@
 extern crate gpiochip as gpio;
 use crate::motor::Motor;
 use crate::light::Light;
+use crate::pump::Pump;
 
 use std::{
 	collections::HashMap,
@@ -19,7 +20,7 @@ pub struct MotorInstance {
 
 #[derive(Clone)]
 pub struct PumpInstance {
-	pub id: i8,
+	pub handle: Arc<Mutex<Pump>>,
 }
 
 #[derive(Clone)]
@@ -30,6 +31,6 @@ pub struct LightInstance {
 #[derive(Clone)]
 pub struct Devices {
 	pub motors: HashMap<u8, MotorInstance>,
-	pub pumps: i8,
+	pub pumps: HashMap<u8, PumpInstance>,
 	pub lights: HashMap<u8, LightInstance>,
 }

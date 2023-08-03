@@ -9,7 +9,7 @@ w.on('open', function open() {
     setTimeout(()=>{
       let msg = {
         action: "light",
-        data: "enable",
+        data: 100,
       }
       w.send(JSON.stringify(msg));
     },2);

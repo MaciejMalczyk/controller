@@ -3,6 +3,8 @@ mod motor;
 use crate::motor::Motor;
 mod light;
 use crate::light::Light;
+mod pump;
+use crate::pump::Pump;
 mod ws_server;
 mod devices;
 
@@ -39,10 +41,14 @@ async fn main() {
 				stop: Arc::new(Mutex::new(gpiochip0.request("gpioS_1", gpio::RequestFlags::OUTPUT, 21, 1).unwrap())),
 			}),
 		]),
-		pumps: 0,
+		pumps: HashMap::from([
+			(0, devices::PumpInstance {
+				handle: Arc::new(Mutex::new(Pump::init(&gpiochip0, 15, 2, 2))),
+			}),
+		]),
 		lights: HashMap::from([
 			(0, devices::LightInstance {
-				handle: Arc::new(Mutex::new(Light::init(&gpiochip0, 3, 1000, 5))),
+				handle: Arc::new(Mutex::new(Light::init(&gpiochip0, 3, 10000, 9000))),
 			}),
 		]),
 	};

@@ -23,7 +23,7 @@ use std::{
 };
 
 use serde::Deserialize;
-use serde_json::{ json, Value, Value::{ Object } };
+use serde_json::{ json, Value };
 
 use crate::devices::{ Devices };
 
@@ -165,6 +165,44 @@ impl WsServer {
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
                                                         async move {
                                                             l_clone.handle.lock().await.stop().await;
+                                                        }
+                                                    });
+                                                } else if data.is_number() {
+                                                    let value = data.as_u64().unwrap();
+                                                    task::spawn({
+                                                        let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            l_clone.handle.lock().await.change(value).await;
+                                                        }
+                                                    });
+                                                }
+                                                
+                                                
+                                            },
+                                            "pump" => {
+                                                let data = message.data.unwrap();
+                                                if data == "enable" {
+                                                    task::spawn({
+                                                        let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            p_clone.handle.lock().await.pwm().await;
+                                                        }
+                                                    });
+                                                } else if data == "disable" {
+                                                    task::spawn({
+                                                        let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            p_clone.handle.lock().await.stop().await;
+                                                        }
+                                                    });
+                                                } else if data.is_array() {
+                                                    let values = data.as_array();
+                                                    let ton = values.unwrap()[0].as_u64().unwrap();
+                                                    let toff = values.unwrap()[1].as_u64().unwrap();
+                                                    task::spawn({
+                                                        let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            p_clone.handle.lock().await.change(ton, toff).await;
                                                         }
                                                     });
                                                 }
