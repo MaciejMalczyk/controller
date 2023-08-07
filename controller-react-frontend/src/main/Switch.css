@@ -2,8 +2,10 @@
     background-color: #a1beb0ff;
     height: 224px;
     border-radius: 0 32px 32px 0;
+    cursor: grab;
 }
 .SwitchIcon {
     width: 100%;
     height: 100%;
+    transition: background-color 0.5s;
 }

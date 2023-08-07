@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import './RotationPanel.css'; 
-import Slider from './Slider';
-import Button from './Button';
-import NumDisplay from './NumericalDisplay';
+import Slider from '../reusableComponents/Slider';
+import Button from '../reusableComponents/Button';
+import NumDisplay from '../reusableComponents/NumericalDisplay';
 import MotorValues from '../tools/MotorValues';
 import { WebsocketServers } from '../tools/Websocket';
 import config from '../config.json';
@@ -21,11 +21,11 @@ const InfoPanel = () => {
     
     return (
         <div className="RotationInfoPanel">
-            <div className="NumericalDisplayLeft">
-                <NumDisplay config={{variable: 1}}></NumDisplay>
+            <div className="RotationPanelNumericalDisplayLeft">
+                <NumDisplay config={{param: MotorValues[1].velocity}}></NumDisplay>
             </div>
-            <div className="NumericalDisplayRight">
-                <NumDisplay config={{variable: 2}}></NumDisplay>
+            <div className="RotationPanelNumericalDisplayRight">
+                <NumDisplay config={{param: MotorValues[2].velocity}}></NumDisplay>
             </div>
             <div className="RotationPanelButtonStart">
                 <Button config={{parentState: isEnabledState, stateConfig: 1, color: "#456454", enableColor: "#00fd7a", onclick: () => {
@@ -57,10 +57,10 @@ const RotationPanel = () => {
         <div className="RotationPanel">
             <div className="RotationPanelSliders">
                 <div className="RotationPanelSliderL">
-                    <Slider config={{variable: 1, maxValue: config.motor1_max_speed }}></Slider>
+                    <Slider config={{maxValue: config.motor1_max_speed, param: MotorValues[1].velocity}}></Slider>
                 </div>
                 <div className="RotationPanelSliderR">
-                    <Slider config={{variable: 2, maxValue: config.motor2_max_speed }}></Slider>
+                    <Slider config={{maxValue: config.motor2_max_speed, param: MotorValues[2].velocity}}></Slider>
                 </div>
             </div>
             <InfoPanel></InfoPanel>

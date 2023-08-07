@@ -5,7 +5,7 @@ interface MotorValuesInterface {
         velocity: StateNumber;
         enabled: StateNumber;
     };
-}
+} 
 
 let MotorValues: MotorValuesInterface = {
     1: {

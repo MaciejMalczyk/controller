@@ -1,22 +1,21 @@
 import React, { createRef, useEffect, RefObject } from 'react';
 import './Slider.css';
-import MotorValues from '../tools/MotorValues';
 
 interface SliderProps {
     config: {
-        variable: number,
         maxValue: number,
+        param: any,
     }
 }
 
 const Slider = ( props: SliderProps ) => {
     
     let pass: {
-        variable: number,
         maxValue: number,
+        param: any,
     } = {
-        variable: props.config.variable,
-        maxValue: props.config.maxValue
+        maxValue: props.config.maxValue,
+        param: props.config.param,
     }
     
     const SliderRef: RefObject<HTMLDivElement> = createRef();
@@ -24,7 +23,9 @@ const Slider = ( props: SliderProps ) => {
     const SliderTrackValueRef: RefObject<HTMLDivElement> = createRef();
     
     useEffect(() => {
-        let height = SliderRef.current!.offsetHeight - 80;
+            
+        let height: number = SliderRef.current!.offsetHeight - 80;
+        
         SliderHidRef.current!.style.marginTop = `${height}px`;
         
         SliderHidRef.current!.onmousedown = () => {
@@ -46,7 +47,7 @@ const Slider = ( props: SliderProps ) => {
             if (el.offsetY >= 40 && el.offsetY <= height+40) {
                 SliderHidRef.current!.style.marginTop = position;
                 let sliderVal = SliderHidRef.current!.style.marginTop;
-                MotorValues[pass.variable].velocity.setValue(Math.round(((height - (parseInt(sliderVal)))*pass.maxValue/height)*10)/10);
+                pass.param.setValue(Math.round(((height - (parseInt(sliderVal)))*pass.maxValue/height)*10)/10);
             }
         });
         

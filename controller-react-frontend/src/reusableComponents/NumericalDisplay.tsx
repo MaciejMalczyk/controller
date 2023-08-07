@@ -1,12 +1,11 @@
 import React, { createRef, useEffect, RefObject } from 'react';
 import './NumericalDisplay.css';
-import MotorValues from '../tools/MotorValues';
 
 interface NumDisplayProps {
     config: {
         backgroundColor?: string,
         fontColor?: string,
-        variable?: number,
+        param?: any,
     }
 }
 
@@ -15,11 +14,11 @@ const NumDisplay = ( props: NumDisplayProps ) => {
     let pass: {
         backgroundColor?: string,
         fontColor?: string,
-        variable: number,
+        param: any,
     } = {
         backgroundColor: props.config.backgroundColor || "#373737",
         fontColor: props.config.fontColor || "#ffffff",
-        variable: props.config.variable || 999,
+        param: props.config.param || 999,
     }
     
     
@@ -27,9 +26,9 @@ const NumDisplay = ( props: NumDisplayProps ) => {
     const NumDisplayValueRef: RefObject<HTMLDivElement> = createRef();
     
     useEffect(() => {
-        window.addEventListener(MotorValues[pass.variable].velocity.event, () => {
+        window.addEventListener(pass.param.event, () => {
             if (NumDisplayValueRef.current) {
-                NumDisplayValueRef.current!.innerText = `${MotorValues[pass.variable].velocity.value}`;
+                NumDisplayValueRef.current!.innerText = `${pass.param.value}`;
             }
         });
         if (pass.backgroundColor) {

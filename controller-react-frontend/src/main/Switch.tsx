@@ -6,6 +6,8 @@ interface SwitchProps {
     config: {
         name?: string,
         icon?: string,
+        enableColor?: string,
+        isActive: any,
         onclick: () => void
     }
 }
@@ -15,10 +17,14 @@ const Switch = ( props: SwitchProps ) => {
     let pass: {
         name: string,
         icon: string,
+        enableColor: string,
+        isActive: any,
         onclick: () => void
     } = {
         name: props.config.name || "",
         icon: props.config.icon || "icon_missing",
+        enableColor: props.config.enableColor || "#ffffff",
+        isActive: props.config.isActive,
         onclick: props.config.onclick || console.log("none")
     }
     
@@ -27,7 +33,9 @@ const Switch = ( props: SwitchProps ) => {
     
     useEffect(() => {
         if (pass.onclick) {
-            SwitchRef.current!.onclick = pass.onclick;
+            SwitchRef.current!.onclick = () => {
+                pass.onclick();
+            }
         }
         
         SwitchIconRef.current!.setAttribute("style",`
@@ -38,7 +46,7 @@ const Switch = ( props: SwitchProps ) => {
     
     return (
         <div className="Switch" id={pass.name} ref={SwitchRef}>
-            <div className="SwitchIcon" ref={SwitchIconRef}>
+            <div className="SwitchIcon" ref={SwitchIconRef} style={{backgroundColor: ((pass.isActive) ? "#ffffff" : "rgb(55,55,55)")}}>
             </div>
         </div>
     )
