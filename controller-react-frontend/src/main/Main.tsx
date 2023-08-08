@@ -10,39 +10,39 @@ InitWs(config.backend_addr);
 
 const Main = () => {
     
-    const RotationPanelRef: RefObject<HTMLDivElement> = createRef();
-    const CultivationPanelRef: RefObject<HTMLDivElement> = createRef();
-    const DataPanelRef: RefObject<HTMLDivElement> = createRef();
-    
     const [showRotation, setShowRotation] = useState(false);
     const [showCultivation, setShowCultivation] = useState(false);
     
     return (
         <div id="MainGrid">
             <div id="Switches">
-                <Switch config={{name: "RotationPanel", icon: "icon_rotation", isActive: showRotation, onclick: () => {
-                    if (showRotation === false) {
-                        setShowRotation(true);
-                    } else {
-                        setShowRotation(false);
-                    }
-                }}}></Switch>
-                <Switch config={{name: "CultivationPanel", icon: "icon_cultivation", isActive: showCultivation, onclick: () => {
-                    if (showCultivation === false) {
-                        setShowCultivation(true);
-                    } else {    
-                        setShowCultivation(false);
-                    }
-                }}}></Switch>
-                <Switch config={{name: "a", isActive: true, onclick: () => {console.log("a")}}}></Switch>
+                <Switch config={{name: "RotationPanel", 
+                                icon: "icon_rotation", 
+                                a: showRotation,
+                                onclick: () => {
+                                    if (showRotation === false) {
+                                        setShowRotation(true);
+                                    } else {
+                                        setShowRotation(false);
+                                    }
+                                }
+                }}></Switch>
+                <Switch config={{name: "CultivationPanel", 
+                                icon: "icon_cultivation", 
+                                a: showCultivation,
+                                onclick: () => {
+                                    if (showCultivation === false) {
+                                        setShowCultivation(true);
+                                    } else {    
+                                        setShowCultivation(false);
+                                    }
+                                }
+                }}></Switch>
+                <Switch config={{name: "a", a: false, onclick: () => {console.log("a")}}}></Switch>
             </div>
             <div id="Panels">
-                <div ref={RotationPanelRef}>
-                    { showRotation && <RotationPanel></RotationPanel> }
-                </div>
-                <div ref={CultivationPanelRef}>
-                    { showCultivation && <CultivationPanel></CultivationPanel> }
-                </div>
+                { showRotation && <RotationPanel></RotationPanel> }
+                { showCultivation && <CultivationPanel></CultivationPanel> }
             </div>
         </div>
     )

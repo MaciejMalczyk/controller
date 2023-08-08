@@ -1,9 +1,11 @@
 #MainGrid {
     display: grid;
     grid-template-columns: max(224px) 64px min-content 64fr;
-    grid-template-rows: 32fr 655fr;
+    grid-template-rows: 64fr 655fr;
 }
 #Switches {
+    position: fixed;
+    top: 64px;
     grid-column: 1/2;
     grid-row: 2/3;
     display: flex;
@@ -16,4 +18,5 @@
     grid-row: 2/3;
     display: flex;
     flex-direction: column;
+    gap: 52px;
 }
