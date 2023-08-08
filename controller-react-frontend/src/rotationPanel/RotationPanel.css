@@ -15,6 +15,22 @@
     display: grid;
     grid-template-columns: 192px 128px 192px;
 }
+.RotationPanelReactSlider {
+    width: 100%;
+    height: 100%;
+}
+.RotationPanelReactSliderTrack {
+    width: 64px;
+    background: #373737;
+    left: calc(50% - 32px);
+} 
+
+.RotationPanelReactSliderThumb {
+    width: 100%;
+    height: 80px;
+    background: #656565;
+    border-radius: 32px;
+}
 .RotationPanelSliderL {
     grid-column: 1/2;
 }

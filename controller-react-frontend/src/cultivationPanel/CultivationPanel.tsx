@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import './CultivationPanel.css';
-import Slider from '../reusableComponents/Slider';
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
 import NumDisplayVsV from '../reusableComponents/NumericalDisplayVsV';
 import CultivationValues from '../tools/CultivationValues';
 import { WebsocketServers } from '../tools/Websocket';
 import config from '../config.json';
+import ReactSlider from "react-slider"
 
 const CultivationPanel = () => {
     
@@ -17,7 +17,16 @@ const CultivationPanel = () => {
     return ( 
         <div className="CultivationPanel">
             <div className="CultivationPanelLightDutySlider">
-                <Slider config={{maxValue: 20, param: CultivationValues["light"]["value"] }}></Slider>
+                <ReactSlider
+                    className="CultivationPanelReactSlider"
+                    thumbClassName="CultivationPanelReactSliderThumb"
+                    trackClassName="CultivationPanelReactSliderTrack"
+                    orientation="vertical"
+                    invert
+                    onChange={(value, index) => {
+                        console.log(CultivationValues["light"]["value"].setValue(value));
+                    }}
+                />
             </div>
             <div className="CultivationPanelLightdutyValue">
                 <NumDisplay config={{param: CultivationValues["light"]["value"]}}></NumDisplay>
@@ -46,10 +55,28 @@ const CultivationPanel = () => {
             </div>
             <div className="CultivationPanelPumpSliders">
                 <div className="CultivationPanelPumpTonSlider">
-                    <Slider config={{maxValue: 20, param: CultivationValues["pump_ton"]["value"]}}></Slider>
+                    <ReactSlider
+                        className="CultivationPanelReactSlider"
+                        thumbClassName="CultivationPanelReactSliderThumb"
+                        trackClassName="CultivationPanelReactSliderTrack"
+                        orientation="vertical"
+                        invert
+                        onChange={(value, index) => {
+                            console.log(CultivationValues["pump_ton"]["value"].setValue(value));
+                        }}
+                    />
                 </div>
                 <div className="CultivationPanelPumpToffSlider">
-                    <Slider config={{maxValue: 20, param: CultivationValues["pump_toff"]["value"] }}></Slider>
+                    <ReactSlider
+                        className="CultivationPanelReactSlider"
+                        thumbClassName="CultivationPanelReactSliderThumb"
+                        trackClassName="CultivationPanelReactSliderTrack"
+                        orientation="vertical"
+                        invert
+                        onChange={(value, index) => {
+                            console.log(CultivationValues["pump_toff"]["value"].setValue(value));
+                        }}
+                    />
                 </div>
             </div>
             <div className="CultivationPanelPumpValues">

@@ -6,6 +6,7 @@ import NumDisplay from '../reusableComponents/NumericalDisplay';
 import MotorValues from '../tools/MotorValues';
 import { WebsocketServers } from '../tools/Websocket';
 import config from '../config.json';
+import ReactSlider from "react-slider"
 
 const InfoPanel = () => {
     
@@ -57,10 +58,32 @@ const RotationPanel = () => {
         <div className="RotationPanel">
             <div className="RotationPanelSliders">
                 <div className="RotationPanelSliderL">
-                    <Slider config={{maxValue: config.motor1_max_speed, param: MotorValues[1].velocity}}></Slider>
+                    <ReactSlider
+                        className="RotationPanelReactSlider"
+                        thumbClassName="RotationPanelReactSliderThumb"
+                        trackClassName="RotationPanelReactSliderTrack"
+                        orientation="vertical"
+                        invert
+                        max={0.5}
+                        step={0.05}
+                        onChange={(value, index) => {
+                            console.log(MotorValues[1]["velocity"].setValue(value));
+                        }}
+                    />
                 </div>
                 <div className="RotationPanelSliderR">
-                    <Slider config={{maxValue: config.motor2_max_speed, param: MotorValues[2].velocity}}></Slider>
+                    <ReactSlider
+                        className="RotationPanelReactSlider"
+                        thumbClassName="RotationPanelReactSliderThumb"
+                        trackClassName="RotationPanelReactSliderTrack"
+                        orientation="vertical"
+                        invert
+                        max={0.5}
+                        step={0.05}
+                        onChange={(value, index) => {
+                            console.log(MotorValues[2]["velocity"].setValue(value));
+                        }}
+                    />
                 </div>
             </div>
             <InfoPanel></InfoPanel>

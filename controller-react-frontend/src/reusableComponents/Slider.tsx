@@ -22,8 +22,8 @@ const Slider = ( props: SliderProps ) => {
     const SliderHidRef: RefObject<HTMLDivElement> = createRef();
     const SliderTrackValueRef: RefObject<HTMLDivElement> = createRef();
     
+    
     useEffect(() => {
-            
         let height: number = SliderRef.current!.offsetHeight - 80;
         
         SliderHidRef.current!.style.marginTop = `${height}px`;
@@ -50,6 +50,10 @@ const Slider = ( props: SliderProps ) => {
                 pass.param.setValue(Math.round(((height - (parseInt(sliderVal)))*pass.maxValue/height)*10)/10);
             }
         });
+        
+        return () => {
+            console.log(SliderTrackValueRef);
+        }
         
     })
     
