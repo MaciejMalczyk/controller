@@ -3,6 +3,8 @@
     height: 224px;
     border-radius: 0 32px 32px 0;
     cursor: grab;
+    border: 8px #373737;
+    border-style: solid solid solid none;
 }
 .SwitchIcon {
     width: 100%;
