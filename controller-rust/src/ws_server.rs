@@ -141,6 +141,7 @@ impl WsServer {
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             },
                                             "state" => {
+                                                //add other devices
                                                 for (n,val) in devices.motors.iter_mut() {
                                                     let info = json!({
                                                         "action": "state",
@@ -153,11 +154,11 @@ impl WsServer {
                                             },
                                             "light" => {
                                                 let data = message.data.unwrap();
-                                                if data == "enable" {
+                                                if data["state"] == "enable" {
                                                     task::spawn({
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
                                                         async move {
-                                                            l_clone.handle.lock().await.pwm().await;
+                                                            l_clone.handle.lock().await.pwm(data["duty"].as_u64().unwrap()).await;
                                                         }
                                                     });
                                                 } else if data == "disable" {
@@ -165,14 +166,6 @@ impl WsServer {
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
                                                         async move {
                                                             l_clone.handle.lock().await.stop().await;
-                                                        }
-                                                    });
-                                                } else if data.is_number() {
-                                                    let value = data.as_u64().unwrap();
-                                                    task::spawn({
-                                                        let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
-                                                        async move {
-                                                            l_clone.handle.lock().await.change(value).await;
                                                         }
                                                     });
                                                 }

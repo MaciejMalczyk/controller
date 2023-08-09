@@ -7,7 +7,7 @@ interface SwitchProps {
         name?: string,
         icon?: string,
         onclick: () => void,
-        a: any,
+        enabled: any,
     }
 }
 
@@ -17,18 +17,17 @@ const Switch = ( props: SwitchProps ) => {
         name: string,
         icon: string,
         onclick: () => void,
-        a: any,
+        enabled: any,
     } = {
         name: props.config.name || "",
         icon: props.config.icon || "icon_missing",
         onclick: props.config.onclick || console.log("none"),
-        a: props.config.a || false,
+        enabled: props.config.enabled || false,
     }
     
     const SwitchRef: RefObject<HTMLDivElement> = createRef();
     const SwitchIconRef: RefObject<HTMLDivElement> = createRef();
     
-    console.log(pass.a);
     useEffect(() => {
         if (pass.onclick) {
             SwitchRef.current!.onclick = () => {
@@ -38,7 +37,7 @@ const Switch = ( props: SwitchProps ) => {
         
         SwitchIconRef.current!.setAttribute("style",`
             -webkit-mask: url(${Icons[pass.icon]}) no-repeat center / contain;
-            background-color: ${((pass.a ? "#ffffff" : "#373737"))};
+            background-color: ${((pass.enabled ? "#ffffff" : "#373737"))};
         `);
     });
     

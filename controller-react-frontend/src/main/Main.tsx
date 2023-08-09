@@ -18,7 +18,7 @@ const Main = () => {
             <div id="Switches">
                 <Switch config={{name: "RotationPanel", 
                                 icon: "icon_rotation", 
-                                a: showRotation,
+                                enabled: showRotation,
                                 onclick: () => {
                                     if (showRotation === false) {
                                         setShowRotation(true);
@@ -29,7 +29,7 @@ const Main = () => {
                 }}></Switch>
                 <Switch config={{name: "CultivationPanel", 
                                 icon: "icon_cultivation", 
-                                a: showCultivation,
+                                enabled: showCultivation,
                                 onclick: () => {
                                     if (showCultivation === false) {
                                         setShowCultivation(true);
@@ -38,7 +38,7 @@ const Main = () => {
                                     }
                                 }
                 }}></Switch>
-                <Switch config={{name: "a", a: false, onclick: () => {console.log("a")}}}></Switch>
+                <Switch config={{name: "a", enabled: false, onclick: () => {console.log("a")}}}></Switch>
             </div>
             <div id="Panels">
                 { showRotation && <RotationPanel></RotationPanel> }

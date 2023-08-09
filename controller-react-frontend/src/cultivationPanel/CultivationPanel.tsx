@@ -38,7 +38,14 @@ const CultivationPanel = () => {
                     color: "#456454",
                     enableColor: "#00fd7a",
                     onclick: () => {
-                        WebsocketServers[0].send({});
+                        WebsocketServers[0].send({
+                            action: "light",
+                            data: {
+                                state: "enable",
+                                duty: CultivationValues["light"]["value"].value,
+                            }
+                        });
+                        lightEnabledStateSet(1);
                     }
                 }}></Button>
             </div>
@@ -49,7 +56,11 @@ const CultivationPanel = () => {
                     color: "#591515",
                     enableColor: "#ff1a1a",
                     onclick: () => {
-                        WebsocketServers[0].send({});
+                        WebsocketServers[0].send({
+                            action: "light",
+                            data: "disable"
+                        });
+                        lightEnabledStateSet(2);
                     }
                 }}></Button>
             </div>
@@ -86,23 +97,25 @@ const CultivationPanel = () => {
             </div>
             <div className="CultivationPanelPumpEnableButton">
                 <Button config={{
-                    parentState: lightEnabledState,
+                    parentState: pumpEnabledState,
                     stateConfig: 1,
                     color: "#456454",
                     enableColor: "#00fd7a",
                     onclick: () => {
                         WebsocketServers[0].send({});
+                        pumpEnabledStateSet(1);
                     }
                 }}></Button>
             </div>
             <div className="CultivationPanelPumpDisableButton">
                 <Button config={{
-                    parentState: lightEnabledState,
+                    parentState: pumpEnabledState,
                     stateConfig: 2,
                     color: "#591515",
                     enableColor: "#ff1a1a",
                     onclick: () => {
                         WebsocketServers[0].send({});
+                        pumpEnabledStateSet(2);
                     }
                 }}></Button>
             </div>
