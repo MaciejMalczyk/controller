@@ -1,7 +1,7 @@
 #MainGrid {
     display: grid;
     grid-template-columns: max(224px) 64px min-content 64fr;
-    grid-template-rows: 64fr 655fr;
+    grid-template-rows: 64px auto;
 }
 #Switches {
     z-index: 10;

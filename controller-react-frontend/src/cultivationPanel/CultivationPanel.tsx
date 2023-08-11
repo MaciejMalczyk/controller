@@ -102,7 +102,14 @@ const CultivationPanel = () => {
                     color: "#456454",
                     enableColor: "#00fd7a",
                     onclick: () => {
-                        WebsocketServers[0].send({});
+                        WebsocketServers[0].send({
+                            action: "pump",
+                            data: {
+                                state: "enable",
+                                ton: CultivationValues["pump_ton"]["value"].value,
+                                toff: CultivationValues["pump_toff"]["value"].value
+                            }
+                        });
                         pumpEnabledStateSet(1);
                     }
                 }}></Button>
@@ -114,7 +121,10 @@ const CultivationPanel = () => {
                     color: "#591515",
                     enableColor: "#ff1a1a",
                     onclick: () => {
-                        WebsocketServers[0].send({});
+                        WebsocketServers[0].send({
+                            action: "pump",
+                            data: "disable"
+                        });
                         pumpEnabledStateSet(2);
                     }
                 }}></Button>
