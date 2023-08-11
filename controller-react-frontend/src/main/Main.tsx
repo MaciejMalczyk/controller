@@ -6,7 +6,7 @@ import CultivationPanel from '../cultivationPanel/CultivationPanel';
 import { InitWs } from '../tools/Websocket';
 import config from '../config.json';
 
-InitWs(config.backend_addr);
+InitWs(config.backend_addr, 0);
 
 const Main = () => {
     

@@ -24,7 +24,7 @@ const CultivationPanel = () => {
                     orientation="vertical"
                     invert
                     onChange={(value, index) => {
-                        console.log(CultivationValues["light"]["value"].setValue(value));
+                        CultivationValues["light"]["value"].setValue(value);
                     }}
                 />
             </div>
@@ -45,6 +45,7 @@ const CultivationPanel = () => {
                                 duty: CultivationValues["light"]["value"].value,
                             }
                         });
+                        console.log("start");
                         lightEnabledStateSet(1);
                     }
                 }}></Button>
@@ -60,6 +61,7 @@ const CultivationPanel = () => {
                             action: "light",
                             data: "disable"
                         });
+                        console.log("stop");
                         lightEnabledStateSet(2);
                     }
                 }}></Button>
@@ -73,7 +75,7 @@ const CultivationPanel = () => {
                         orientation="vertical"
                         invert
                         onChange={(value, index) => {
-                            console.log(CultivationValues["pump_ton"]["value"].setValue(value));
+                            CultivationValues["pump_ton"]["value"].setValue(value);
                         }}
                     />
                 </div>
@@ -85,7 +87,7 @@ const CultivationPanel = () => {
                         orientation="vertical"
                         invert
                         onChange={(value, index) => {
-                            console.log(CultivationValues["pump_toff"]["value"].setValue(value));
+                            CultivationValues["pump_toff"]["value"].setValue(value);
                         }}
                     />
                 </div>

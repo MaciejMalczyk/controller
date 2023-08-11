@@ -16,7 +16,6 @@ class Websocket {
         }
         
         ws.onopen = () => {
-            //console.log("ws open");
             this.send({action: "state"});
         }
         
@@ -24,6 +23,7 @@ class Websocket {
             let data = JSON.parse(msg.data);
             console.log(data);
             if (data.action === "state") {
+                //FIXME
                 Object.keys(MotorValues).forEach((it) => {
                     if (it === `${data.motor}`) {
                         MotorValues[Number(it)].velocity.setValue(Math.round(data.speed*10)/10);
@@ -49,11 +49,8 @@ class Websocket {
 
 let WebsocketServers: { [key: number]: Websocket } = [];
 
-let iterator = 0;
-
-function InitWs(address: string) {
-    WebsocketServers[iterator] = new Websocket(address);
-    iterator += 1;
+function InitWs(address: string, id: number) {
+    WebsocketServers[id] = new Websocket(address);
 }
 
 export { WebsocketServers, InitWs };
