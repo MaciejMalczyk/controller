@@ -15,9 +15,8 @@ class Websocket {
             console.log(err);
         }
         
-        ws.onopen = () => {
-            this.send({action: "state"});
-        }
+//         ws.onopen = () => {
+//         }
         
         ws.onmessage = (msg) => {
             let data = JSON.parse(msg.data);
@@ -26,7 +25,7 @@ class Websocket {
                 //FIXME
                 Object.keys(MotorValues).forEach((it) => {
                     if (it === `${data.motor}`) {
-                        MotorValues[Number(it)].velocity.setValue(Math.round(data.speed*10)/10);
+                        MotorValues[Number(it)].velocity.setValue(Number(data.speed));
                         MotorValues[Number(it)].enabled.setValue(Number(data.enabled));
                     }
                 })

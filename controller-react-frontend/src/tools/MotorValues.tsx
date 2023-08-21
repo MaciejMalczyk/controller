@@ -8,11 +8,11 @@ interface MotorValuesInterface {
 } 
 
 let MotorValues: MotorValuesInterface = {
-    1: {
+    0: {
         velocity: new StateNumber(0),
         enabled: new StateNumber(0),
     },
-    2: {
+    1: {
         velocity: new StateNumber(0),
         enabled: new StateNumber(0),
     },

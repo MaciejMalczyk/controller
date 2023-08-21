@@ -14,7 +14,6 @@ use tokio::sync::Mutex;
 pub struct MotorInstance {
 	pub handle: Arc<Mutex<Motor>>,
 	pub speed: Arc<Mutex<f32>>,
-	pub enabled: Arc<Mutex<bool>>,
 	pub stop: Arc<Mutex<gpio::GpioHandle>>,
 }
 

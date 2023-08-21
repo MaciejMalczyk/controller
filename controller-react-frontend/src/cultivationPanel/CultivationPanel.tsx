@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CultivationPanel.css';
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
@@ -12,7 +12,6 @@ const CultivationPanel = () => {
     
     const [lightEnabledState, lightEnabledStateSet] = useState(0);
     const [pumpEnabledState, pumpEnabledStateSet] = useState(0);
-    
     
     return ( 
         <div className="CultivationPanel">

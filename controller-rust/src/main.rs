@@ -31,13 +31,11 @@ async fn main() {
 			(0, devices::MotorInstance {
 				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 13, 1.0))),
 				speed: Arc::new(Mutex::new(0.0)),
-				enabled: Arc::new(Mutex::new(false)),
 				stop: Arc::new(Mutex::new(gpiochip0.request("gpioS_1", gpio::RequestFlags::OUTPUT, 26, 1).unwrap())),
 			}),
 			(1, devices::MotorInstance {
 				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 16, 1.0))),
 				speed: Arc::new(Mutex::new(0.0)),
-				enabled: Arc::new(Mutex::new(false)),
 				stop: Arc::new(Mutex::new(gpiochip0.request("gpioS_1", gpio::RequestFlags::OUTPUT, 21, 1).unwrap())),
 			}),
 		]),

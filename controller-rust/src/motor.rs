@@ -18,6 +18,7 @@ pub struct Motor {
     freq: f64,
     second: f64,
     steps_per_rot: f64,
+    pub rot_per_s: f64,
     
     
 }
@@ -25,7 +26,7 @@ pub struct Motor {
 impl Motor {
     pub fn init(chip: &gpio::GpioChip, pin_num: u32, rot_per_s: f64) -> Motor {
         let mut m = Motor { 
-            disable: false,
+            disable: true,
             pin: chip.request(format!("gpioM_{}",pin_num).as_str(), gpio::RequestFlags::OUTPUT,  pin_num, 0).unwrap(),
             u_s: Duration::from_micros(1),
             launch_interval: 0.0,
@@ -34,12 +35,14 @@ impl Motor {
             freq: 0.0,
             second: 1000000.0,
             steps_per_rot: 400.0,
+            rot_per_s: 0.0,
         };
         m.set_speed(rot_per_s);
         m
     }
     
     pub fn set_speed(&mut self, rot_per_s: f64) {
+        self.rot_per_s = rot_per_s;
         self.freq = self.steps_per_rot*rot_per_s; 
         self.launch_interval = (self.second/(self.steps_per_rot*rot_per_s))*5.0;
         self.interval = self.second/(self.steps_per_rot*rot_per_s);
