@@ -5,21 +5,24 @@ use tokio::sync::{ Mutex };
 use std::sync::Arc;
 
 pub struct Light {
-    switch: Arc<Mutex<bool>>,
+    pub switch: Arc<Mutex<bool>>,
     pin: Arc<Mutex<gpio::GpioHandle>>,
     freq: u64,
+    pub duty: u64,
 }
 
 impl Light {
     pub fn init(chip: &gpio::GpioChip, pin: u32, freq: u64) -> Light {
         let l = Light {
-            switch: Arc::new(Mutex::new(true)),
+            switch: Arc::new(Mutex::new(false)),
             pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
             freq: freq,
+            duty: 0,
         };
         l
     }
     pub async fn pwm(&mut self, duty: u64) {
+        self.duty = duty;
         *self.switch.lock().await = true;
         tokio::spawn({
             let sw_clone = Arc::clone(&self.switch);

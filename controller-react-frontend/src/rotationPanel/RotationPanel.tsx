@@ -72,7 +72,7 @@ const RotationPanel = () => {
                         max={0.5}
                         step={0.05}
                         onChange={(value, index) => {
-                            MotorValues[1]["velocity"].setValue(value);
+                            MotorValues[0]["velocity"].setValue(value);
                         }}
                     />
                 </div>
@@ -86,7 +86,7 @@ const RotationPanel = () => {
                         max={0.5}
                         step={0.05}
                         onChange={(value, index) => {
-                            MotorValues[2]["velocity"].setValue(value);
+                            MotorValues[1]["velocity"].setValue(value);
                         }}
                     />
                 </div>

@@ -5,19 +5,25 @@ use tokio::sync::{ Mutex };
 use std::sync::Arc;
 
 pub struct Pump {
-    switch: Arc<Mutex<bool>>,
+    pub switch: Arc<Mutex<bool>>,
     pin: Arc<Mutex<gpio::GpioHandle>>,
+    pub ton: u64,
+    pub toff: u64,
 }
 
 impl Pump {
     pub fn init(chip: &gpio::GpioChip, pin: u32) -> Pump {
         let p = Pump {
-            switch: Arc::new(Mutex::new(true)),
+            switch: Arc::new(Mutex::new(false)),
             pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
+            ton: 0,
+            toff: 0,
         };
         p
     }
     pub async fn pwm(&mut self, ton: u64, toff: u64) {
+        self.ton = ton;
+        self.toff = toff;
         *self.switch.lock().await = true;
         tokio::spawn({
             let sw_clone = Arc::clone(&self.switch);
