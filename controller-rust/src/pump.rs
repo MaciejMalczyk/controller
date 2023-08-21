@@ -7,26 +7,22 @@ use std::sync::Arc;
 pub struct Pump {
     switch: Arc<Mutex<bool>>,
     pin: Arc<Mutex<gpio::GpioHandle>>,
-    ton: u64,
-    toff: u64,
 }
 
 impl Pump {
-    pub fn init(chip: &gpio::GpioChip, pin: u32, ton: u64, toff: u64) -> Pump {
+    pub fn init(chip: &gpio::GpioChip, pin: u32) -> Pump {
         let p = Pump {
             switch: Arc::new(Mutex::new(true)),
             pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
-            ton: ton,
-            toff: toff,
         };
         p
     }
-    pub async fn pwm(&mut self) {
+    pub async fn pwm(&mut self, ton: u64, toff: u64) {
         *self.switch.lock().await = true;
         tokio::spawn({
             let sw_clone = Arc::clone(&self.switch);
-            let on = self.ton;
-            let off = self.toff;
+            let on = ton;
+            let off = toff;
             let pin_clone = Arc::clone(&self.pin);
             async move {
                 while *sw_clone.lock().await {
@@ -37,10 +33,6 @@ impl Pump {
                 }
             }
         });
-    }
-    pub async fn change(&mut self, ton: u64, toff: u64) {
-        self.ton = ton;
-        self.toff = toff;
     }
     pub async fn stop(&mut self) {
         *self.switch.lock().await = false;

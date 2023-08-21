@@ -174,11 +174,11 @@ impl WsServer {
                                             },
                                             "pump" => {
                                                 let data = message.data.unwrap();
-                                                if data == "enable" {
+                                                if data["state"] == "enable" {
                                                     task::spawn({
                                                         let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
                                                         async move {
-                                                            p_clone.handle.lock().await.pwm().await;
+                                                            p_clone.handle.lock().await.pwm(data["ton"].as_u64().unwrap(), data["toff"].as_u64().unwrap()).await;
                                                         }
                                                     });
                                                 } else if data == "disable" {
@@ -186,16 +186,6 @@ impl WsServer {
                                                         let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
                                                         async move {
                                                             p_clone.handle.lock().await.stop().await;
-                                                        }
-                                                    });
-                                                } else if data.is_array() {
-                                                    let values = data.as_array();
-                                                    let ton = values.unwrap()[0].as_u64().unwrap();
-                                                    let toff = values.unwrap()[1].as_u64().unwrap();
-                                                    task::spawn({
-                                                        let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
-                                                        async move {
-                                                            p_clone.handle.lock().await.change(ton, toff).await;
                                                         }
                                                     });
                                                 }
