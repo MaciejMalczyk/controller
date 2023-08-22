@@ -14,8 +14,8 @@ const InfoPanel = () => {
     
     useEffect(() => {
         WebsocketServers[0].send({action:"state"});
-        window.addEventListener(MotorValues[1].enabled.event, () => {
-            if (MotorValues[0].enabled.value === 1) {
+        window.addEventListener(MotorValues[0].enabled.event, () => {
+            if (MotorValues[0].enabled.value === true) {
                 isEnabledStateSet(1);
             } else {
                 isEnabledStateSet(2);

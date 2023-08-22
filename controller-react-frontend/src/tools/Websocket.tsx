@@ -1,4 +1,5 @@
 import MotorValues from '../tools/MotorValues';
+import CultivationValues from '../tools/CultivationValues';
 
 class Websocket {
     ws: WebSocket;
@@ -22,13 +23,16 @@ class Websocket {
             let data = JSON.parse(msg.data);
             console.log(data);
             if (data.action === "state") {
-                //FIXME
-                Object.keys(MotorValues).forEach((it) => {
-                    if (it === `${data.motor}`) {
-                        MotorValues[Number(it)].velocity.setValue(Number(data.speed));
-                        MotorValues[Number(it)].enabled.setValue(Number(data.enabled));
-                    }
-                })
+                Object.keys(data.motors).forEach((it) => {
+                    MotorValues[Number(it)].velocity.setValue(data.motors[it].speed);
+                    MotorValues[Number(it)].enabled.setValue(data.motors[it].enabled);
+                });
+                CultivationValues["light"].value.setValue(data.lights[0].duty);
+                CultivationValues["light"].enabled.setValue(data.lights[0].enabled);
+                CultivationValues["pump_ton"].value.setValue(data.pumps[0].ton);
+                CultivationValues["pump_toff"].value.setValue(data.pumps[0].toff);
+                CultivationValues["pump_ton"].enabled.setValue(data.pumps[0].enabled);
+                
             }
         }
         ws.onclose = () => {

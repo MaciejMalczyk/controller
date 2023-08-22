@@ -145,7 +145,6 @@ impl WsServer {
                                                 let mut motors = vec![];
                                                 for (_n,val) in devices.motors.iter_mut() {
                                                     let motor = json!({
-                                                        "action": "state",
                                                         "speed": val.clone().handle.lock().await.rot_per_s,
                                                         "enabled": !val.clone().handle.lock().await.disable,
                                                     });
@@ -154,7 +153,6 @@ impl WsServer {
                                                 let mut lights = vec![];
                                                 for (_n,val) in devices.lights.iter_mut() {
                                                     let light = json!({
-                                                        "action": "state",
                                                         "duty": val.clone().handle.lock().await.duty,
                                                         "enabled": *val.clone().handle.lock().await.switch.lock().await,
                                                     });
@@ -163,7 +161,6 @@ impl WsServer {
                                                 let mut pumps = vec![];
                                                 for (_n,val) in devices.pumps.iter_mut() {
                                                     let pump = json!({
-                                                        "action": "state",
                                                         "ton": val.clone().handle.lock().await.ton,
                                                         "toff": val.clone().handle.lock().await.toff,
                                                         "enabled": *val.clone().handle.lock().await.switch.lock().await,
@@ -171,6 +168,7 @@ impl WsServer {
                                                     pumps.push(pump);
                                                 }
                                                 let msg = json!({
+                                                    "action": "state",
                                                     "motors": motors,
                                                     "lights": lights,
                                                     "pumps": pumps,

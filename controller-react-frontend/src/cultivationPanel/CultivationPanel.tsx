@@ -10,6 +10,25 @@ import ReactSlider from "react-slider"
 
 const CultivationPanel = () => {
     
+    useEffect(() => {
+        WebsocketServers[0].send({action:"state"});
+        console.log(CultivationValues);
+        window.addEventListener(CultivationValues["light"].enabled.event, () => {
+            if (CultivationValues["light"].enabled.value === true) {
+                lightEnabledStateSet(1);
+            } else {
+                lightEnabledStateSet(2);
+            }
+        });
+        window.addEventListener(CultivationValues["pump_ton"].enabled.event, () => {
+            if (CultivationValues["pump_ton"].enabled.value === true) {
+                pumpEnabledStateSet(1);
+            } else {
+                pumpEnabledStateSet(2);
+            }
+        });
+    });
+    
     const [lightEnabledState, lightEnabledStateSet] = useState(0);
     const [pumpEnabledState, pumpEnabledStateSet] = useState(0);
     
