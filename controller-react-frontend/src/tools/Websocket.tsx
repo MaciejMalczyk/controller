@@ -11,15 +11,15 @@ class Websocket {
     }
     
     start() {
-        let ws = new WebSocket(`ws://${this.address}`);
-        ws.onerror = (err) => {
+        this.ws = new WebSocket(`ws://${this.address}`);
+        this.ws.onerror = (err) => {
             console.log(err);
         }
         
 //         ws.onopen = () => {
 //         }
         
-        ws.onmessage = (msg) => {
+        this.ws.onmessage = (msg) => {
             let data = JSON.parse(msg.data);
             console.log(data);
             if (data.action === "state") {
@@ -35,12 +35,12 @@ class Websocket {
                 
             }
         }
-        ws.onclose = () => {
+        this.ws.onclose = () => {
             setTimeout(()=>{
                 this.start();
             },1000);
         }
-        return ws;
+        return this.ws;
     }
     
     send(obj: object) {
