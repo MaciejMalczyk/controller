@@ -28,6 +28,7 @@ use serde_json::{ json, Value };
 
 use crate::{ 
     devices::{ Devices },
+    config,
 };
 
 use mongodb::{
@@ -72,6 +73,8 @@ impl WsServer {
         
         async fn connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr, mut devices: Devices) {
             //listen for connection
+            let cfg = config::read();
+            
             println!("New connection: {}", addr);
             
             //await handshake of websocket connection
@@ -86,7 +89,7 @@ impl WsServer {
             peer_map.lock().await.insert(addr, tx);
             let (mut out, mut inc) = websocket_stream.split();
             
-            let mongo_client = Client::with_options(ClientOptions::parse("mongodb://192.168.1.102:27017/").await.unwrap()).unwrap().clone();
+            let mongo_client = Client::with_options(ClientOptions::parse(cfg.get("mongodb").unwrap().as_str().unwrap()).await.unwrap()).unwrap().clone();
 
             
             let _listener_task = task::spawn({

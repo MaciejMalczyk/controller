@@ -1,12 +1,15 @@
-extern crate gpiochip as gpio;
 mod motor;
-use crate::motor::Motor;
 mod light;
-use crate::light::Light;
 mod pump;
-use crate::pump::Pump;
 mod ws_server;
 mod devices;
+mod config;
+
+extern crate gpiochip as gpio;
+use crate::motor::Motor;
+use crate::light::Light;
+use crate::pump::Pump;
+
 
 use std::{
 	collections::HashMap,
