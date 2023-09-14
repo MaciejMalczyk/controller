@@ -3,13 +3,24 @@
     height: 160px;
     border-radius: 24px;
     display: grid;
-    grid-template-rows: 2fr 1fr 1fr;
+    grid-template-rows: 5% 65% auto;
 }
 .NumDisplayValue {
     font-size: 122px;
     text-align: center;
     font-family: Josefin Sans;
     grid-row: 2/3;
+    color: white;
+    font-weight: 600;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+.NumDisplayUnit {
+    grid-row: 3/4;
+    font-size: 40px;
+    text-align: center;
+    font-family: Josefin Sans;
     color: white;
     font-weight: 600;
     -webkit-user-select: none;

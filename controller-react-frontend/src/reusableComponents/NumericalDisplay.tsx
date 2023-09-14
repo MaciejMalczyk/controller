@@ -6,6 +6,7 @@ interface NumDisplayProps {
         backgroundColor?: string,
         fontColor?: string,
         param?: any,
+        unit?: string,
     }
 }
 
@@ -15,15 +16,18 @@ const NumDisplay = ( props: NumDisplayProps ) => {
         backgroundColor?: string,
         fontColor?: string,
         param: any,
+        unit?: string,
     } = {
         backgroundColor: props.config.backgroundColor || "#373737",
         fontColor: props.config.fontColor || "#ffffff",
         param: props.config.param || 999,
+        unit: props.config.unit || "/",
     }
     
     
     const NumDisplayRef: RefObject<HTMLDivElement> = createRef();
     const NumDisplayValueRef: RefObject<HTMLDivElement> = createRef();
+    const NumDisplayUnitRef: RefObject<HTMLDivElement> = createRef();
     
     useEffect(() => {
         window.addEventListener(pass.param.event, () => {
@@ -37,12 +41,17 @@ const NumDisplay = ( props: NumDisplayProps ) => {
         if (pass.fontColor) {
             NumDisplayValueRef.current!.style.color = pass.fontColor;
         }
+        if (pass.unit) {
+            NumDisplayUnitRef.current!.innerText = pass.unit;
+        }
         
     });
     
     return(
         <div className="NumDisplay" ref={NumDisplayRef}> 
             <div className="NumDisplayValue" ref={NumDisplayValueRef}>{0}
+            </div>
+            <div className="NumDisplayUnit" ref={NumDisplayUnitRef}>{"/"}
             </div>
         </div>
     )

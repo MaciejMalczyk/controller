@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './CultivationPanel.css';
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
@@ -8,11 +8,12 @@ import { WebsocketServers } from '../tools/Websocket';
 import config from '../config.json';
 import ReactSlider from "react-slider"
 
-const CultivationPanel = () => {
+const CultivationPanelLight = () => {
+    
+    const [lightEnabledState, lightEnabledStateSet] = useState(0);
     
     useEffect(() => {
-        WebsocketServers[0].send({action:"state"});
-        console.log(CultivationValues);
+        WebsocketServers[0].send({action:"state", data: "lights"});
         window.addEventListener(CultivationValues["light"].enabled.event, () => {
             if (CultivationValues["light"].enabled.value === true) {
                 lightEnabledStateSet(1);
@@ -20,20 +21,10 @@ const CultivationPanel = () => {
                 lightEnabledStateSet(2);
             }
         });
-        window.addEventListener(CultivationValues["pump_ton"].enabled.event, () => {
-            if (CultivationValues["pump_ton"].enabled.value === true) {
-                pumpEnabledStateSet(1);
-            } else {
-                pumpEnabledStateSet(2);
-            }
-        });
     });
     
-    const [lightEnabledState, lightEnabledStateSet] = useState(0);
-    const [pumpEnabledState, pumpEnabledStateSet] = useState(0);
-    
-    return ( 
-        <div className="CultivationPanel">
+    return (
+        <div className="CultivationPanelLight">
             <div className="CultivationPanelLightDutySlider">
                 <ReactSlider
                     className="CultivationPanelReactSlider"
@@ -47,7 +38,10 @@ const CultivationPanel = () => {
                 />
             </div>
             <div className="CultivationPanelLightdutyValue">
-                <NumDisplay config={{param: CultivationValues["light"]["value"]}}></NumDisplay>
+                <NumDisplay config={{
+                    param: CultivationValues["light"]["value"],
+                    unit: "%",
+                }}></NumDisplay>
             </div>
             <div className="CultivationPanelLightEnableButton">
                 <Button config={{
@@ -84,6 +78,27 @@ const CultivationPanel = () => {
                     }
                 }}></Button>
             </div>
+        </div>
+    )
+}
+
+const CultivationPanelPump = () => {
+    
+    const [pumpEnabledState, pumpEnabledStateSet] = useState(0);
+    
+    useEffect(() => {
+        WebsocketServers[0].send({action:"state", data: "pumps"});
+        window.addEventListener(CultivationValues["pump_ton"].enabled.event, () => {
+            if (CultivationValues["pump_ton"].enabled.value === true) {
+                pumpEnabledStateSet(1);
+            } else {
+                pumpEnabledStateSet(2);
+            }
+        });
+    });
+    
+    return (
+        <div className="CultivationPanelPump">
             <div className="CultivationPanelPumpSliders">
                 <div className="CultivationPanelPumpTonSlider">
                     <ReactSlider
@@ -149,6 +164,17 @@ const CultivationPanel = () => {
                     }
                 }}></Button>
             </div>
+        </div>
+    )
+    
+}
+
+const CultivationPanel = () => {
+    
+    return ( 
+        <div className="CultivationPanel">
+            <CultivationPanelLight></CultivationPanelLight>
+            <CultivationPanelPump></CultivationPanelPump>
         </div>
     )
 }
