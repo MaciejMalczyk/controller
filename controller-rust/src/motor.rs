@@ -42,10 +42,10 @@ impl Motor {
     }
     
     pub fn set_speed(&mut self, rot_per_s: f64) {
-        self.rot_per_s = rot_per_s;
-        self.freq = self.steps_per_rot*rot_per_s; 
-        self.launch_interval = (self.second/(self.steps_per_rot*rot_per_s))*5.0;
-        self.interval = self.second/(self.steps_per_rot*rot_per_s);
+        self.rot_per_s = rot_per_s*3.0;
+        self.freq = self.steps_per_rot*self.rot_per_s; 
+        self.launch_interval = (self.second/(self.steps_per_rot*self.rot_per_s))*5.0;
+        self.interval = self.second/(self.steps_per_rot*self.rot_per_s);
     }
     
     async fn launch(&mut self) {
@@ -53,8 +53,8 @@ impl Motor {
         sleep(self.sleep/2);
         self.pin.set(0).unwrap();
         sleep(self.sleep/2);
-        if self.sleep*999/1000 > ((self.second/self.freq) as u32)*self.u_s {
-            self.sleep = self.sleep*999/1000;
+        if self.sleep*998/1000 > ((self.second/self.freq) as u32)*self.u_s {
+            self.sleep = self.sleep*998/1000;
         } else {
             self.sleep = ((self.second/self.freq) as u32)*self.u_s;
         }

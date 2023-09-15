@@ -102,8 +102,8 @@ const RotationPanel = () => {
                         trackClassName="RotationPanelReactSliderTrack"
                         orientation="vertical"
                         invert
-                        max={1.2}
-                        step={0.05}
+                        max={0.4}
+                        step={0.01}
                         onChange={(value, index) => {
                             MotorValues[0]["velocity"].setValue(value);
                         }}
@@ -116,8 +116,8 @@ const RotationPanel = () => {
                         trackClassName="RotationPanelReactSliderTrack"
                         orientation="vertical"
                         invert
-                        max={1.2}
-                        step={0.05}
+                        max={0.4}
+                        step={0.01}
                         onChange={(value, index) => {
                             MotorValues[1]["velocity"].setValue(value);
                         }}

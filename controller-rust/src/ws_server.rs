@@ -129,7 +129,7 @@ impl WsServer {
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();
                                                             async move {
-                                                                motor_clone.handle.lock().await.set_speed(speed[id]);
+                                                                motor_clone.handle.lock().await.set_speed(speed[id]); //3 is wheel ratio
                                                                 motor_clone.stop.lock().await.set(0).unwrap();
                                                                 motor_clone.handle.lock().await.enable();
                                                                 
@@ -175,40 +175,70 @@ impl WsServer {
                                                 out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
                                             },
                                             "state" => {
-                                                //add other devices
-                                                let mut motors = vec![];
-                                                for (_n,val) in devices.motors.iter_mut() {
-                                                    let motor = json!({
-                                                        "speed": val.clone().handle.lock().await.rot_per_s,
-                                                        "enabled": !val.clone().handle.lock().await.disable,
-                                                    });
-                                                    motors.push(motor);
+                                                let data = message.data.unwrap();
+                                                let device = data.as_str();
+                                                match device {
+                                                    Some("motors") => {
+                                                        let mut motors = vec![];
+                                                        for (_n,val) in devices.motors.iter_mut() {
+                                                            let motor = json!({
+                                                                "speed": val.clone().handle.lock().await.rot_per_s/3.0,
+                                                                "enabled": !val.clone().handle.lock().await.disable,
+                                                                "n": _n,
+                                                            });
+                                                            motors.push(motor);
+                                                        }
+                                                        let msg = json!({
+                                                            "action": "state",
+                                                            "motors": motors,
+                                                            
+                                                        });
+                                                        println!("{:?}", msg);
+                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
+                                                    }
+                                                    Some("lights") => {
+                                                        let mut lights = vec![];
+                                                        for (_n,val) in devices.lights.iter_mut() {
+                                                            let light = json!({
+                                                                "duty": val.clone().handle.lock().await.duty,
+                                                                "enabled": *val.clone().handle.lock().await.switch.lock().await,
+                                                            });
+                                                            lights.push(light);
+                                                        }
+                                                        let msg = json!({
+                                                            "action": "state",
+                                                            "lights": lights,
+                                                            
+                                                        });
+                                                        println!("{:?}", msg);
+                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
+                                                    }
+                                                    Some("pumps") => {
+                                                        let mut pumps = vec![];
+                                                        for (_n,val) in devices.pumps.iter_mut() {
+                                                            let pump = json!({
+                                                                "ton": val.clone().handle.lock().await.ton,
+                                                                "toff": val.clone().handle.lock().await.toff,
+                                                                "enabled": *val.clone().handle.lock().await.switch.lock().await,
+                                                            });
+                                                            pumps.push(pump);
+                                                        }
+                                                        let msg = json!({
+                                                            "action": "state",
+                                                            "pumps": pumps,
+                                                            
+                                                        });
+                                                        println!("{:?}", msg);
+                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
+                                                    },
+                                                    Some(&_) => {
+                                                        println!("Unknown device");
+                                                    }
+                                                    None => {
+                                                        println!("err");
+                                                    }
+                                                    
                                                 }
-                                                let mut lights = vec![];
-                                                for (_n,val) in devices.lights.iter_mut() {
-                                                    let light = json!({
-                                                        "duty": val.clone().handle.lock().await.duty,
-                                                        "enabled": *val.clone().handle.lock().await.switch.lock().await,
-                                                    });
-                                                    lights.push(light);
-                                                }
-                                                let mut pumps = vec![];
-                                                for (_n,val) in devices.pumps.iter_mut() {
-                                                    let pump = json!({
-                                                        "ton": val.clone().handle.lock().await.ton,
-                                                        "toff": val.clone().handle.lock().await.toff,
-                                                        "enabled": *val.clone().handle.lock().await.switch.lock().await,
-                                                    });
-                                                    pumps.push(pump);
-                                                }
-                                                let msg = json!({
-                                                    "action": "state",
-                                                    "motors": motors,
-                                                    "lights": lights,
-                                                    "pumps": pumps,
-                                                });
-                                                
-                                                out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
                                             },
                                             "light" => {
                                                 let data = message.data.unwrap();

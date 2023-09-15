@@ -25,8 +25,9 @@ class Websocket {
             if (data.action === "state") {
                 if (data.motors) {
                     Object.keys(data.motors).forEach((it) => {
-                        MotorValues[Number(it)].velocity.setValue(data.motors[it].speed*3);
+                        MotorValues[Number(it)].velocity.setValue(data.motors[it].speed);
                         MotorValues[Number(it)].enabled.setValue(data.motors[it].enabled);
+                        console.log(data.motors[it].n);
                     });
                 } else if (data.lights) {
                     CultivationValues["light"].value.setValue(data.lights[0].duty);
