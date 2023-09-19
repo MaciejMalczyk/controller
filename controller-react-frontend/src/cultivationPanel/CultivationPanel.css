@@ -51,28 +51,15 @@
     grid-column: 4/5;
     grid-row: 6/7;
 }
-.CultivationPanelPumpSliders {
-    grid-column: 1/2;
-    grid-row: 2/7;
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 64px;
-}
-.CultivationPanelPumpTonSlider {
-    grid-row: 1/2;
-}
-.CultivationPanelPumpToffSlider {
-    grid-row: 2/3;
-}
 .CultivationPanelPumpValues {
     grid-column: 3/4;
     grid-row: 2/3;
     display: flex;
     gap: 16px;
 }
-.CultivationPanelPumpTonValue {
-}
-.CultivationPanelPumpToffValue {
+.CultivationPanelPumpSlider {
+    grid-column: 1/2;
+    grid-row: 2/7;
 }
 .CultivationPanelPumpEnableButton {
     grid-column: 3/4;

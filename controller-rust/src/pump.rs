@@ -5,42 +5,67 @@ use tokio::sync::{ Mutex };
 use std::sync::Arc;
 
 pub struct Pump {
-    pub switch: Arc<Mutex<bool>>,
     pin: Arc<Mutex<gpio::GpioHandle>>,
-    pub ton: u64,
-    pub toff: u64,
+    enable: Arc<Mutex<bool>>,
+    moisture: Arc<Mutex<f64>>,
+    from_interface: Arc<Mutex<f64>>,
 }
 
 impl Pump {
     pub fn init(chip: &gpio::GpioChip, pin: u32) -> Pump {
         let p = Pump {
-            switch: Arc::new(Mutex::new(false)),
             pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
-            ton: 0,
-            toff: 0,
+            enable: Arc::new(Mutex::new(false)),
+            moisture: Arc::new(Mutex::new(0.0)),
+            from_interface: Arc::new(Mutex::new(0.0)),
         };
         p
     }
-    pub async fn pwm(&mut self, ton: u64, toff: u64) {
-        self.ton = ton;
-        self.toff = toff;
-        *self.switch.lock().await = true;
+    
+    pub async fn set_moisture(&mut self, moisture: f64) {
+        *self.moisture.lock().await = moisture;
+    }
+    
+    pub async fn set_from_interface(&mut self, val: f64) {
+        *self.from_interface.lock().await = val;
+    }
+    
+    pub async fn get_moisture(&mut self) -> f64 {
+        *self.moisture.lock().await
+    }
+    
+    pub async fn get_from_interface(&mut self) -> f64 {
+        *self.from_interface.lock().await
+    }
+    
+    pub async fn get_enable(&mut self) -> bool {
+        *self.enable.lock().await
+    }
+    
+    pub async fn start(&mut self) {
+        *self.enable.lock().await = true;
         tokio::spawn({
-            let sw_clone = Arc::clone(&self.switch);
-            let on = ton;
-            let off = toff;
             let pin_clone = Arc::clone(&self.pin);
+            let fi = Arc::clone(&self.from_interface);
+            let m = Arc::clone(&self.moisture);
+            let enable_clone = Arc::clone(&self.enable);
             async move {
-                while *sw_clone.lock().await {
-                    pin_clone.lock().await.set(255).unwrap();
-                    sleep(Duration::from_secs(on)).await;
-                    pin_clone.lock().await.set(0).unwrap();
-                    sleep(Duration::from_secs(off)).await;
+                loop {
+                    if *m.lock().await > 0.0 && *fi.lock().await > *m.lock().await {
+                        pin_clone.lock().await.set(255).unwrap();
+                        sleep(Duration::from_secs(2)).await;
+                        pin_clone.lock().await.set(0).unwrap();
+                    }
+                    if *enable_clone.lock().await == false {
+                        break;
+                    }
+                    sleep(Duration::from_secs(120)).await;
                 }
             }
         });
     }
+    
     pub async fn stop(&mut self) {
-        *self.switch.lock().await = false;
+       *self.enable.lock().await = false; 
     }
 }

@@ -33,9 +33,8 @@ class Websocket {
                     CultivationValues["light"].value.setValue(data.lights[0].duty);
                     CultivationValues["light"].enabled.setValue(data.lights[0].enabled);
                 } else if (data.pumps) {
-                    CultivationValues["pump_ton"].value.setValue(data.pumps[0].ton);
-                    CultivationValues["pump_toff"].value.setValue(data.pumps[0].toff);
-                    CultivationValues["pump_ton"].enabled.setValue(data.pumps[0].enabled);
+                    CultivationValues["pump"].enabled.setValue(data.pumps[0].enabled);
+                    CultivationValues["pump"].value.setValue(data.pumps[0].from_interface);
                 }
             }
         }

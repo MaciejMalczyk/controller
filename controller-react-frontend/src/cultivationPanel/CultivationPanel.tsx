@@ -88,8 +88,8 @@ const CultivationPanelPump = () => {
     
     useEffect(() => {
         WebsocketServers[0].send({action:"state", data: "pumps"});
-        window.addEventListener(CultivationValues["pump_ton"].enabled.event, () => {
-            if (CultivationValues["pump_ton"].enabled.value === true) {
+        window.addEventListener(CultivationValues["pump"].enabled.event, () => {
+            if (CultivationValues["pump"].enabled.value === true) {
                 pumpEnabledStateSet(1);
             } else {
                 pumpEnabledStateSet(2);
@@ -99,35 +99,24 @@ const CultivationPanelPump = () => {
     
     return (
         <div className="CultivationPanelPump">
-            <div className="CultivationPanelPumpSliders">
-                <div className="CultivationPanelPumpTonSlider">
-                    <ReactSlider
-                        className="CultivationPanelReactSlider"
-                        thumbClassName="CultivationPanelReactSliderThumb"
-                        trackClassName="CultivationPanelReactSliderTrack"
-                        orientation="vertical"
-                        invert
-                        onChange={(value, index) => {
-                            CultivationValues["pump_ton"]["value"].setValue(value);
-                        }}
-                    />
-                </div>
-                <div className="CultivationPanelPumpToffSlider">
-                    <ReactSlider
-                        className="CultivationPanelReactSlider"
-                        thumbClassName="CultivationPanelReactSliderThumb"
-                        trackClassName="CultivationPanelReactSliderTrack"
-                        orientation="vertical"
-                        invert
-                        onChange={(value, index) => {
-                            CultivationValues["pump_toff"]["value"].setValue(value);
-                        }}
-                    />
-                </div>
+            <div className="CultivationPanelPumpSlider">
+                <ReactSlider
+                    className="CultivationPanelReactSlider"
+                    thumbClassName="CultivationPanelReactSliderThumb"
+                    trackClassName="CultivationPanelReactSliderTrack"
+                    orientation="vertical"
+                    invert
+                    onChange={(value, index) => {
+                        CultivationValues["pump"]["value"].setValue(value);
+                    }}
+                />
             </div>
             <div className="CultivationPanelPumpValues">
                 <div className="CultivationPanelPumpTonValue">
-                    <NumDisplayVsV config={{param1: CultivationValues["pump_ton"]["value"], param2: CultivationValues["pump_toff"]["value"]}}></NumDisplayVsV>
+                    <NumDisplay config={{
+                        param: CultivationValues["pump"]["value"], 
+                        unit: "%",
+                    }}></NumDisplay>
                 </div>
             </div>
             <div className="CultivationPanelPumpEnableButton">
@@ -137,12 +126,12 @@ const CultivationPanelPump = () => {
                     color: "#456454",
                     enableColor: "#00fd7a",
                     onclick: () => {
+                        console.log(CultivationValues["pump"]["value"].value);
                         WebsocketServers[0].send({
                             action: "pump",
                             data: {
                                 state: "enable",
-                                ton: CultivationValues["pump_ton"]["value"].value,
-                                toff: CultivationValues["pump_toff"]["value"].value
+                                value: CultivationValues["pump"]["value"].value,
                             }
                         });
                         pumpEnabledStateSet(1);
@@ -158,7 +147,9 @@ const CultivationPanelPump = () => {
                     onclick: () => {
                         WebsocketServers[0].send({
                             action: "pump",
-                            data: "disable"
+                            data: {
+                                state: "disable",
+                            }
                         });
                         pumpEnabledStateSet(2);
                     }

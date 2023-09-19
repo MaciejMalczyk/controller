@@ -13,6 +13,7 @@ use tokio::{
             UnboundedSender,
         },
     },
+    time::sleep,
 };
 
 use std::{
@@ -98,7 +99,6 @@ impl WsServer {
                         tokio::select! {
                             msg = inc.next() => {
                                 match msg {
-                                    //add spindown for every motor
                                     Some(Err(..)) => {
                                         println!("Connection break");
                                         break;
@@ -215,11 +215,11 @@ impl WsServer {
                                                     }
                                                     Some("pumps") => {
                                                         let mut pumps = vec![];
-                                                        for (_n,val) in devices.pumps.iter_mut() {
+                                                        for (_n, val) in devices.pumps.iter_mut() {
                                                             let pump = json!({
-                                                                "ton": val.clone().handle.lock().await.ton,
-                                                                "toff": val.clone().handle.lock().await.toff,
-                                                                "enabled": *val.clone().handle.lock().await.switch.lock().await,
+                                                                "enabled": val.clone().handle.lock().await.get_enable().await,
+                                                                "moisture": val.clone().handle.lock().await.get_moisture().await,
+                                                                "from_interface": val.clone().handle.lock().await.get_from_interface().await,
                                                             });
                                                             pumps.push(pump);
                                                         }
@@ -256,6 +256,7 @@ impl WsServer {
                                                                 "time": format!("{}", local_time)
                                                             };
                                                             coll.insert_one(d,None).await.unwrap();
+                                                            
                                                             l_clone.handle.lock().await.pwm(data["duty"].as_u64().unwrap()).await;
                                                         }
                                                     });
@@ -265,6 +266,7 @@ impl WsServer {
                                                         let mongo_client_clone = mongo_client.clone();
                                                         async move {
                                                             l_clone.handle.lock().await.stop().await;
+                                                            
                                                             let db = mongo_client_clone.database("clinostate");
                                                             let coll = db.collection::<Document>("lights");
                                                             let local_time: DateTime<Local> = Local::now();
@@ -278,40 +280,39 @@ impl WsServer {
                                             },
                                             "pump" => {
                                                 let data = message.data.unwrap();
-                                                if data["state"] == "enable" {
-                                                    task::spawn({
-                                                        let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
-                                                        let mongo_client_clone = mongo_client.clone();
-                                                        async move {
-                                                            let db = mongo_client_clone.database("clinostate");
-                                                            let coll = db.collection::<Document>("pumps");
-                                                            let local_time: DateTime<Local> = Local::now();
-                                                            let d = doc!{
-                                                                format!("pump_{}", &0): "enabled",
-                                                                "ton": data["ton"].as_i64().unwrap(),
-                                                                "toff": data["toff"].as_i64().unwrap(),
-                                                                "time": format!("{}", local_time)
-                                                            };
-                                                            coll.insert_one(d,None).await.unwrap();
-                                                            p_clone.handle.lock().await.pwm(data["ton"].as_u64().unwrap(), data["toff"].as_u64().unwrap()).await;
-                                                        }
-                                                    });
-                                                } else if data == "disable" {
-                                                    task::spawn({
-                                                        let p_clone = devices.pumps.get_mut(&0).expect("REASON").clone();
-                                                        let mongo_client_clone = mongo_client.clone();
-                                                        async move {
-                                                            p_clone.handle.lock().await.stop().await;
-                                                            let db = mongo_client_clone.database("clinostate");
-                                                            let coll = db.collection::<Document>("pumps");
-                                                            let local_time: DateTime<Local> = Local::now();
-                                                            let d = doc!{format!("pump_{}", &0): "disabled", "time": format!("{}", local_time)};
-                                                            coll.insert_one(d,None).await.unwrap();
-                                                        }
-                                                    });
+                                                
+                                                if data["type"] == "cultivation" {
+                                                    let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();                                                    
+                                                    p_clone.handle.lock().await.set_moisture(data["value"].as_f64().unwrap()).await;
                                                 }
                                                 
+                                                if data["state"] == "enable" {
+                                                    let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
+                                                    let mongo_client_clone = mongo_client.clone();
+                                                    
+                                                    let db = mongo_client_clone.database("clinostate");
+                                                    let coll = db.collection::<Document>("pumps");
+                                                    let local_time: DateTime<Local> = Local::now();
+                                                    let d = doc!{format!("pump_{}", &0): "enabled", "time": format!("{}", local_time)};
+                                                    coll.insert_one(d,None).await.unwrap();
+                                                    
+                                                    p_clone.handle.lock().await.set_from_interface(data["value"].as_f64().unwrap()).await;
+                                                    p_clone.handle.lock().await.start().await;
+                                                }
                                                 
+                                                if data["state"] == "disable" {
+                                                    let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
+                                                    let mongo_client_clone = mongo_client.clone();
+                                                    
+                                                    let db = mongo_client_clone.database("clinostate");
+                                                    let coll = db.collection::<Document>("pumps");
+                                                    let local_time: DateTime<Local> = Local::now();
+                                                    let d = doc!{format!("pump_{}", &0): "disabled", "time": format!("{}", local_time)};
+                                                    coll.insert_one(d,None).await.unwrap();
+                                                    
+                                                    p_clone.handle.lock().await.stop().await;
+                                                    
+                                                }
                                             }
                                             &_ => println!("{:?}", message)
                                         }

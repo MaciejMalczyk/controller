@@ -13,11 +13,7 @@ let CultivationValues: CultivationValuesInterface = {
         value: new StateNumber(0),
         enabled: new StateBool(false),
     },
-    'pump_ton': {
-        value: new StateNumber(0),
-        enabled: new StateBool(false),
-    },
-    'pump_toff': {
+    'pump': {
         value: new StateNumber(0),
         enabled: new StateBool(false),
     },
