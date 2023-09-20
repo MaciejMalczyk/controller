@@ -32,7 +32,7 @@ const NumDisplay = ( props: NumDisplayProps ) => {
     useEffect(() => {
         window.addEventListener(pass.param.event, () => {
             if (NumDisplayValueRef.current) {
-                if (pass.param.value.toString().length > 2) {
+                if (pass.param.value % 1 !== 0) {
                     NumDisplayValueRef.current!.innerText = `${pass.param.value.toFixed(2)}`;
                 } else {
                     NumDisplayValueRef.current!.innerText = `${pass.param.value}`;

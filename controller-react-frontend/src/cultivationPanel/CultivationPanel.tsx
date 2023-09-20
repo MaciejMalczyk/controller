@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './CultivationPanel.css';
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
-import NumDisplayVsV from '../reusableComponents/NumericalDisplayVsV';
+import TextBox from '../reusableComponents/TextBox';
 import CultivationValues from '../tools/CultivationValues';
 import { WebsocketServers } from '../tools/Websocket';
 import config from '../config.json';
@@ -42,6 +42,13 @@ const CultivationPanelLight = () => {
                     param: CultivationValues["light"]["value"],
                     unit: "%",
                 }}></NumDisplay>
+            </div>
+            <div className="CultivationPanelLightTagName">
+                <TextBox 
+                    text="Light intensity"
+                    backgroundColor="rgb(55, 55, 55)"
+                    fontColor="#ffffff"
+                ></TextBox>
             </div>
             <div className="CultivationPanelLightEnableButton">
                 <Button config={{
@@ -118,6 +125,13 @@ const CultivationPanelPump = () => {
                         unit: "%",
                     }}></NumDisplay>
                 </div>
+            </div>
+            <div className="CultivationPanelPumpTagName">
+                <TextBox 
+                    text="Moisture level"
+                    backgroundColor="rgb(55, 55, 55)"
+                    fontColor="#ffffff"
+                ></TextBox>
             </div>
             <div className="CultivationPanelPumpEnableButton">
                 <Button config={{

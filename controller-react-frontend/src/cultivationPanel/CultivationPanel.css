@@ -10,17 +10,17 @@
     grid-column: 1/2;
     display: grid;
     grid-template-columns: 96px 192px 64px auto;
-    grid-template-rows: 96px auto 32px auto 32px auto 96px;
+    grid-template-rows: 96px auto 32px auto 32px auto 32px auto 96px;
 }
 .CultivationPanelPump {
     grid-column: 3/4;
     display: grid;
     grid-template-columns: 192px 64px auto 96px;
-    grid-template-rows: 96px auto 32px auto 32px auto 96px;
+    grid-template-rows: 96px auto 32px auto 32px auto 32px auto 96px;
 }
 .CultivationPanelLightDutySlider {
     grid-column: 2/3;
-    grid-row: 2/7;
+    grid-row: 2/9;
 }
 .CultivationPanelReactSlider {
     width: 100%;
@@ -39,17 +39,22 @@
     border-radius: 32px;
 }
 
+.CultivationPanelLightTagName {
+    grid-column: 4/5;
+    grid-row: 4/5;
+}
+
 .CultivationPanelLightdutyValue {
     grid-column: 4/5;
     grid-row: 2/3;
 }
 .CultivationPanelLightEnableButton {
     grid-column: 4/5;
-    grid-row: 4/5;
+    grid-row: 6/7;
 }
 .CultivationPanelLightDisableButton {
     grid-column: 4/5;
-    grid-row: 6/7;
+    grid-row: 8/9;
 }
 .CultivationPanelPumpValues {
     grid-column: 3/4;
@@ -59,13 +64,18 @@
 }
 .CultivationPanelPumpSlider {
     grid-column: 1/2;
-    grid-row: 2/7;
+    grid-row: 2/9;
 }
-.CultivationPanelPumpEnableButton {
+.CultivationPanelPumpTagName {
     grid-column: 3/4;
     grid-row: 4/5;
 }
-.CultivationPanelPumpDisableButton {
+
+.CultivationPanelPumpEnableButton {
     grid-column: 3/4;
     grid-row: 6/7;
+}
+.CultivationPanelPumpDisableButton {
+    grid-column: 3/4;
+    grid-row: 8/9;
 }
