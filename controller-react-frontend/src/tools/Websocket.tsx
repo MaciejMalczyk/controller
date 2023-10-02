@@ -16,8 +16,11 @@ class Websocket {
             console.log(err);
         }
         
-//         ws.onopen = () => {
-//         }
+        this.ws.onopen = () => {
+            setInterval(()=>{
+                this.send({action:"ping"});
+            },2000)
+        }
         
         this.ws.onmessage = (msg) => {
             let data = JSON.parse(msg.data);
@@ -25,9 +28,9 @@ class Websocket {
             if (data.action === "state") {
                 if (data.motors) {
                     Object.keys(data.motors).forEach((it) => {
-                        MotorValues[Number(it)].velocity.setValue(data.motors[it].speed);
-                        MotorValues[Number(it)].enabled.setValue(data.motors[it].enabled);
-                        console.log(data.motors[it].n);
+                        console.log(data.motors[it].n, data.motors[it].speed);
+                        MotorValues[data.motors[it].n].velocity.setValue(data.motors[data.motors[it].n].speed);
+                        MotorValues[data.motors[it].n].enabled.setValue(data.motors[data.motors[it].n].enabled);
                     });
                 } else if (data.lights) {
                     CultivationValues["light"].value.setValue(data.lights[0].duty);

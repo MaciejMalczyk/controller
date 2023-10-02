@@ -3,97 +3,93 @@ extern crate gpiochip as gpio;
 // use tokio::{
 //     time::{sleep, Duration},
 // };
-use std::{
-    thread::sleep,
-    time::Duration,
-};
+use tokio::time::{sleep, Duration};
+use tokio::sync::{Mutex};
+use std::sync::Arc;
 
 pub struct Motor {
-    pub disable: bool,
-    pin: gpio::GpioHandle,
-    u_s: Duration,
-    launch_interval: f64,
-    interval: f64,
-    sleep: Duration,
-    freq: f64,
-    second: f64,
-    steps_per_rot: f64,
-    pub rot_per_s: f64,
+    enable: Arc<Mutex<bool>>,
+    pin: Arc<Mutex<gpio::GpioHandle>>,
+    stop: Arc<Mutex<gpio::GpioHandle>>,
+    divider: Arc<Mutex<f64>>,
+    slope: Arc<Mutex<f64>>,
+    velocity: Arc<Mutex<f64>>,
     
     
 }
 
 impl Motor {
-    pub fn init(chip: &gpio::GpioChip, pin_num: u32, rot_per_s: f64) -> Motor {
-        let mut m = Motor { 
-            disable: true,
-            pin: chip.request(format!("gpioM_{}",pin_num).as_str(), gpio::RequestFlags::OUTPUT,  pin_num, 0).unwrap(),
-            u_s: Duration::from_micros(1),
-            launch_interval: 0.0,
-            interval: 0.0,
-            sleep: Duration::from_micros(0),
-            freq: 0.0,
-            second: 1000000.0,
-            steps_per_rot: 400.0,
-            rot_per_s: 0.0,
+    pub fn init(chip: &gpio::GpioChip, step_pin: u32, stop_pin: u32) -> Motor {
+        let m = Motor { 
+            enable: Arc::new(Mutex::new(false)),
+            pin: Arc::new(Mutex::new(chip.request(format!("gpioM_{}",step_pin).as_str(), gpio::RequestFlags::OUTPUT,  step_pin, 0).unwrap())),
+            stop: Arc::new(Mutex::new(chip.request(format!("gpioS_{}",stop_pin).as_str(), gpio::RequestFlags::OUTPUT,  stop_pin, 1).unwrap())),
+            divider: Arc::new(Mutex::new(0.0)),
+            slope: Arc::new(Mutex::new(0.0)),
+            velocity: Arc::new(Mutex::new(0.0)),
         };
-        m.set_speed(rot_per_s);
         m
     }
     
-    pub fn set_speed(&mut self, rot_per_s: f64) {
-        self.rot_per_s = rot_per_s*3.0;
-        self.freq = self.steps_per_rot*self.rot_per_s; 
-        self.launch_interval = (self.second/(self.steps_per_rot*self.rot_per_s))*5.0;
-        self.interval = self.second/(self.steps_per_rot*self.rot_per_s);
+    pub async fn set_velocity(&mut self, vel: f64) {
+        //2400 = 2 [half of cycle] * 1200 [steps to full frame rot]
+        //1200 = 400 [steps setuped on driver] * 3 [timing pulley multiplier]
+        *self.velocity.lock().await = vel;
+        *self.divider.lock().await = 2400.0*vel;
+        *self.slope.lock().await = 2400.0*(vel/8.0);
     }
     
-    async fn launch(&mut self) {
-        self.pin.set(255).unwrap();
-        sleep(self.sleep/2);
-        self.pin.set(0).unwrap();
-        sleep(self.sleep/2);
-        if self.sleep*998/1000 > ((self.second/self.freq) as u32)*self.u_s {
-            self.sleep = self.sleep*998/1000;
-        } else {
-            self.sleep = ((self.second/self.freq) as u32)*self.u_s;
-        }
+    pub async fn get_velocity(&mut self) -> f64 {
+        *self.velocity.lock().await
     }
-    pub async fn step(&mut self) -> bool {
-        if self.sleep == Duration::from_micros(0) {
-            self.sleep = ((self.launch_interval) as u32)*self.u_s;
-        }
-        if self.disable == false {
-            if self.sleep > (self.interval as u32)*self.u_s {
-                self.launch().await;
-                return false;
-            } else {
-                self.pin.set(255).unwrap();
-                sleep(self.sleep/2);
-                self.pin.set(0).unwrap();
-                sleep(self.sleep/2);
-                return false;
+    
+    pub async fn get_enable(&mut self) -> bool {
+        *self.enable.lock().await
+    }
+    
+    pub async fn start(&mut self) {
+        *self.enable.lock().await = true;
+        tokio::spawn({
+            let pin_clone = Arc::clone(&self.pin);
+            let enable_clone = Arc::clone(&self.enable);
+            let divider_clone = Arc::clone(&self.divider);
+            let slope_clone = Arc::clone(&self.slope);
+            let stop_clone = Arc::clone(&self.stop);
+            async move {
+                //add slope for start and stop
+                let mut divider = *slope_clone.lock().await;
+                stop_clone.lock().await.set(0).unwrap();
+                loop {
+                    if *enable_clone.lock().await == true {
+                        if divider < *divider_clone.lock().await {
+                            pin_clone.lock().await.set(255).unwrap();
+                            sleep(Duration::from_micros(1000000/(divider as u64))).await;
+                            pin_clone.lock().await.set(0).unwrap();
+                            sleep(Duration::from_micros(1000000/(divider as u64))).await;
+                            divider = divider*1.01;
+                        } else {
+                            pin_clone.lock().await.set(255).unwrap();
+                            sleep(Duration::from_micros(1000000/(divider as u64))).await;
+                            pin_clone.lock().await.set(0).unwrap();
+                            sleep(Duration::from_micros(1000000/(divider as u64))).await;
+                        }
+                    } else {
+                        if divider > *slope_clone.lock().await {
+                            pin_clone.lock().await.set(255).unwrap();
+                            sleep(Duration::from_micros(1000000/(divider as u64))).await;
+                            pin_clone.lock().await.set(0).unwrap();
+                            sleep(Duration::from_micros(1000000/(divider as u64))).await;
+                            divider = divider*0.99;
+                        } else {
+                            stop_clone.lock().await.set(1).unwrap();
+                            break;
+                        }
+                    }
+                }
             }
-        } else {
-            self.stop().await;
-            return true;
-        }
-        
+        });
     }
-    async fn stop(&mut self) {
-        while self.sleep <= (self.launch_interval as u32)*self.u_s {
-            self.pin.set(255).unwrap();
-            sleep(self.sleep/2);
-            self.pin.set(0).unwrap();
-            sleep(self.sleep/2);
-            self.sleep = self.sleep*1005/1000;
-        }
-    }
-    pub fn disable(&mut self) {
-        self.disable = true;
-    }
-    
-    pub fn enable(&mut self) {
-        self.disable = false;
+    pub async fn stop(&mut self) {
+        *self.enable.lock().await = false;
     }
 } 

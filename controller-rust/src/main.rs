@@ -32,14 +32,10 @@ async fn main() {
 	let dev = devices::Devices {
 		motors: HashMap::from([
 			(0, devices::MotorInstance {
-				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 13, 0.0))),
-				speed: Arc::new(Mutex::new(0.0)),
-				stop: Arc::new(Mutex::new(gpiochip0.request("gpioS_0", gpio::RequestFlags::OUTPUT, 26, 1).unwrap())),
+				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 5, 26))),
 			}),
 			(1, devices::MotorInstance {
-				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 16, 0.0))),
-				speed: Arc::new(Mutex::new(0.0)),
-				stop: Arc::new(Mutex::new(gpiochip0.request("gpioS_1", gpio::RequestFlags::OUTPUT, 21, 1).unwrap())),
+				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 16, 21))),
 			}),
 		]),
 		pumps: HashMap::from([

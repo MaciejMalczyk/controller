@@ -7,7 +7,7 @@ use tokio_tungstenite::tungstenite::protocol::Message;
 use tokio::{
     task,
     sync::{
-        Mutex, MutexGuard,
+        Mutex,
         mpsc:: {
             unbounded_channel,
             UnboundedSender,
@@ -103,7 +103,10 @@ impl WsServer {
                                         break;
                                     },
                                     Some(msg) => {
-                                        let message: MotorMsg = serde_json::from_str(&msg.unwrap().to_text().unwrap()).unwrap();
+                                        let message: MotorMsg = match serde_json::from_str::<MotorMsg>(&msg.unwrap().to_text().unwrap()) {
+                                            Ok(m) => { m },
+                                            Err(_) => { todo!() }
+                                        };
                                         let action = message.action.as_str();
                                         match action {
                                             "motors" => {
@@ -128,9 +131,8 @@ impl WsServer {
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();
                                                             async move {
-                                                                motor_clone.handle.lock().await.set_speed(speed[id]); //3 is wheel ratio
-                                                                motor_clone.stop.lock().await.set(0).unwrap();
-                                                                motor_clone.handle.lock().await.enable();
+                                                                motor_clone.handle.lock().await.set_velocity(speed[id]).await;
+                                                                motor_clone.handle.lock().await.start().await;
                                                                 
                                                                 let db = mongo_client_clone.database("clinostate");
                                                                 let coll = db.collection::<Document>("motors");
@@ -142,13 +144,6 @@ impl WsServer {
                                                                 };
                                                                 coll.insert_one(d,None).await.unwrap();
                                                                 
-                                                                loop {
-                                                                    let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
-                                                                    if motor_guard.step().await == true {
-                                                                        motor_clone.stop.lock().await.set(1).unwrap();
-                                                                        break;
-                                                                    }
-                                                                }
                                                             }
                                                         });
                                                     } else if val == &false {
@@ -156,8 +151,8 @@ impl WsServer {
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();
                                                             async move {
-                                                                let mut motor_guard = MutexGuard::map(motor_clone.handle.lock().await, |f| f);
-                                                                motor_guard.disable();
+                                                                motor_clone.handle.lock().await.stop().await;
+                                                                
                                                                 let db = mongo_client_clone.database("clinostate");
                                                                 let coll = db.collection::<Document>("motors");
                                                                 let local_time: DateTime<Local> = Local::now();
@@ -181,8 +176,8 @@ impl WsServer {
                                                         let mut motors = vec![];
                                                         for (_n,val) in devices.motors.iter_mut() {
                                                             let motor = json!({
-                                                                "speed": val.clone().handle.lock().await.rot_per_s/3.0,
-                                                                "enabled": !val.clone().handle.lock().await.disable,
+                                                                "speed": val.clone().handle.lock().await.get_velocity().await,
+                                                                "enabled": val.clone().handle.lock().await.get_enable().await,
                                                                 "n": _n,
                                                             });
                                                             motors.push(motor);

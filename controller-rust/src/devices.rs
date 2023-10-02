@@ -13,8 +13,6 @@ use tokio::sync::Mutex;
 #[derive(Clone)]
 pub struct MotorInstance {
 	pub handle: Arc<Mutex<Motor>>,
-	pub speed: Arc<Mutex<f32>>,
-	pub stop: Arc<Mutex<gpio::GpioHandle>>,
 }
 
 #[derive(Clone)]
