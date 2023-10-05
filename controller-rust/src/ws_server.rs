@@ -114,6 +114,7 @@ impl WsServer {
                                                 let mut enable: [bool; 2] = [false, false];
                                                 let mut speed: [f64; 2] = [0.0, 0.0];
                                                 for (k, v) in data.as_object().unwrap() {
+                                                    println!("{:?}", data.as_object().unwrap());
                                                     let mut iter = 0;
                                                     for i in v.as_array().unwrap() {
                                                         if k == "enable" {

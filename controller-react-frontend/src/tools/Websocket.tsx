@@ -24,11 +24,10 @@ class Websocket {
         
         this.ws.onmessage = (msg) => {
             let data = JSON.parse(msg.data);
-            console.log(data);
+            //console.log(data);
             if (data.action === "state") {
                 if (data.motors) {
                     Object.keys(data.motors).forEach((it) => {
-                        console.log(data.motors[it].n, data.motors[it].speed);
                         MotorValues[data.motors[it].n].velocity.setValue(data.motors[data.motors[it].n].speed);
                         MotorValues[data.motors[it].n].enabled.setValue(data.motors[data.motors[it].n].enabled);
                     });

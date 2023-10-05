@@ -1,45 +1,35 @@
+//FIXME WORK IN PROGRESS
+
 extern crate gpiochip as gpio;
 
-use tokio::time::{sleep, Duration};
 use tokio::sync::{ Mutex };
 use std::sync::Arc;
 
+use rppal::pwm::{Channel, Polarity, Pwm};
+
 pub struct Light {
     pub switch: Arc<Mutex<bool>>,
-    pin: Arc<Mutex<gpio::GpioHandle>>,
-    freq: u64,
+    pwm: Pwm,
     pub duty: u64,
 }
 
 impl Light {
-    pub fn init(chip: &gpio::GpioChip, pin: u32, freq: u64) -> Light {
+    pub fn init(freq: u64) -> Light {
         let l = Light {
             switch: Arc::new(Mutex::new(false)),
-            pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
-            freq: freq,
+            pwm: Pwm::with_frequency(Channel::Pwm0, freq as f64, 0.0, Polarity::Normal, false).unwrap(),
             duty: 0,
         };
         l
     }
     pub async fn pwm(&mut self, duty: u64) {
-        self.duty = duty;
-        *self.switch.lock().await = true;
-        tokio::spawn({
-            let sw_clone = Arc::clone(&self.switch);
-            let f = self.freq;
-            let d = duty*100;
-            let pin_clone = Arc::clone(&self.pin);
-            async move {
-                while *sw_clone.lock().await {
-                    pin_clone.lock().await.set(255).unwrap();
-                    sleep(Duration::from_micros(d)).await;
-                    pin_clone.lock().await.set(0).unwrap();
-                    sleep(Duration::from_micros(f - d)).await;
-                }
-            }
-        });
+        self.pwm.set_duty_cycle((duty/100) as f64).unwrap();
+        self.pwm.enable().unwrap();
+        thread::sleep(Duration::from_secs(10));
+        println!("Enabled");
     }
     pub async fn stop(&mut self) {
-        *self.switch.lock().await = false;
+        self.pwm.disable().unwrap();
+        println!("Disabled");
     }
 }

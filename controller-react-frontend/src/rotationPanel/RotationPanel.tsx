@@ -22,6 +22,7 @@ const InfoPanel = () => {
                 isEnabledStateSet(2);
             }
         });
+        console.log("left:", MotorValues[0].velocity, "right:", MotorValues[1].velocity)
     });
     
     
