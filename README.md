@@ -21,6 +21,8 @@ Go into controller-react-frontend and run `npm install` to install frontend pack
 Go into controller-node-tests and run `npm install` to install tests
 
 ## Start 
+Before running increase your open files limit. This is neccesary for high precission async timers in rust.
+
 Run `cargo run` in controller-rust dir and `npm start` in controller-react-frontend dir
 
 ## Test
