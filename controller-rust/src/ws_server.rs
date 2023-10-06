@@ -195,8 +195,8 @@ impl WsServer {
                                                         let mut lights = vec![];
                                                         for (_n,val) in devices.lights.iter_mut() {
                                                             let light = json!({
-                                                                "duty": val.clone().handle.lock().await.duty,
-                                                                "enabled": *val.clone().handle.lock().await.switch.lock().await,
+                                                                "duty": val.clone().handle.lock().await.get_duty().await,
+                                                                "enabled": val.clone().handle.lock().await.get_status().await,
                                                             });
                                                             lights.push(light);
                                                         }
@@ -252,7 +252,7 @@ impl WsServer {
                                                             };
                                                             coll.insert_one(d,None).await.unwrap();
                                                             
-                                                            l_clone.handle.lock().await.pwm(data["duty"].as_u64().unwrap()).await;
+                                                            l_clone.handle.lock().await.pwm(data["duty"].as_f64().unwrap()).await;
                                                         }
                                                     });
                                                 } else if data == "disable" {
