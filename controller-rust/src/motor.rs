@@ -3,10 +3,13 @@ extern crate gpiochip as gpio;
 // use tokio::{
 //     time::{sleep, Duration},
 // };
-use tokio::time::{sleep, Duration, Instant};
+use std::{
+    thread::sleep,
+    time::Duration,
+};
+
 use tokio::sync::{Mutex};
 use std::sync::Arc;
-use async_timer::Interval;
 
 pub struct Motor {
     enable: Arc<Mutex<bool>>,
@@ -59,31 +62,31 @@ impl Motor {
             async move {
                 //add slope for start and stop
                 let mut divider = *slope_clone.lock().await;
-                let mut interval = Interval::platform_new(Duration::from_micros(1000000/(divider as u64)));
+                let mut interval = Duration::from_micros(1000000/(divider as u64));
                 stop_clone.lock().await.set(0).unwrap();
                 loop {
                     if *enable_clone.lock().await == true {
                         if *divider_clone.lock().await >= divider {
                             pin_clone.lock().await.set(255).unwrap();
-                            interval.wait().await;
+                            sleep(interval);
                             pin_clone.lock().await.set(0).unwrap();
-                            interval.wait().await;
+                            sleep(interval);
                             divider = divider*1.01;
-                            interval = Interval::platform_new(Duration::from_micros(1000000/(divider as u64)));
+                            interval = Duration::from_micros(1000000/(divider as u64));
                         } else {
                             pin_clone.lock().await.set(255).unwrap();
-                            interval.wait().await;
+                            sleep(interval);
                             pin_clone.lock().await.set(0).unwrap();
-                            interval.wait().await;
+                            sleep(interval);
                         }
                     } else {
                         if divider >= *slope_clone.lock().await {
                             pin_clone.lock().await.set(255).unwrap();
-                            interval.wait().await;
+                            sleep(interval);
                             pin_clone.lock().await.set(0).unwrap();
-                            interval.wait().await;
+                            sleep(interval);
                             divider = divider*0.99;
-                            interval = Interval::platform_new(Duration::from_micros(1000000/(divider as u64)));
+                            interval = Duration::from_micros(1000000/(divider as u64));
                         } else {
                             stop_clone.lock().await.set(1).unwrap();
                             break;
