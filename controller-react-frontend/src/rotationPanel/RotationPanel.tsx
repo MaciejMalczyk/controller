@@ -22,7 +22,6 @@ const InfoPanel = () => {
                 isEnabledStateSet(2);
             }
         });
-        console.log("left:", MotorValues[0].velocity, "right:", MotorValues[1].velocity)
     });
     
     
@@ -105,6 +104,7 @@ const RotationPanel = () => {
                         invert
                         max={0.4}
                         step={0.01}
+                        defaultValue={MotorValues[0]["velocity"].value}
                         onChange={(value, index) => {
                             MotorValues[0]["velocity"].setValue(value);
                         }}
@@ -119,6 +119,7 @@ const RotationPanel = () => {
                         invert
                         max={0.4}
                         step={0.01}
+                        defaultValue={MotorValues[1]["velocity"].value}
                         onChange={(value, index) => {
                             MotorValues[1]["velocity"].setValue(value);
                         }}

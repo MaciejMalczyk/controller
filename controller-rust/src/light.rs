@@ -35,7 +35,7 @@ impl Light {
             let status_clone = Arc::clone(&self.status);
             async move {
                 pwm_clone.lock().await.set_duty_cycle(*duty_clone.lock().await/100.0).unwrap();
-                println!("{}", *duty_clone.lock().await/100.0);
+                //println!("{}", *duty_clone.lock().await/100.0);
                 pwm_clone.lock().await.enable().unwrap();
                 *status_clone.lock().await = true;
             }

@@ -114,7 +114,7 @@ impl WsServer {
                                                 let mut enable: [bool; 2] = [false, false];
                                                 let mut speed: [f64; 2] = [0.0, 0.0];
                                                 for (k, v) in data.as_object().unwrap() {
-                                                    println!("{:?}", data.as_object().unwrap());
+                                                    //println!("{:?}", data.as_object().unwrap());
                                                     let mut iter = 0;
                                                     for i in v.as_array().unwrap() {
                                                         if k == "enable" {
@@ -130,11 +130,15 @@ impl WsServer {
                                                     if val == &true {
                                                         task::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
-                                                            let mongo_client_clone = mongo_client.clone();
                                                             async move {
                                                                 motor_clone.handle.lock().await.set_velocity(speed[id]).await;
                                                                 motor_clone.handle.lock().await.start().await;
                                                                 
+                                                            }
+                                                        });
+                                                        task::spawn({
+                                                            let mongo_client_clone = mongo_client.clone();
+                                                            async move {
                                                                 let db = mongo_client_clone.database("clinostate");
                                                                 let coll = db.collection::<Document>("motors");
                                                                 let local_time: DateTime<Local> = Local::now();
@@ -144,7 +148,6 @@ impl WsServer {
                                                                     "time": format!("{}", local_time)
                                                                 };
                                                                 coll.insert_one(d,None).await.unwrap();
-                                                                
                                                             }
                                                         });
                                                     } else if val == &false {
@@ -188,7 +191,7 @@ impl WsServer {
                                                             "motors": motors,
                                                             
                                                         });
-                                                        println!("{:?}", msg);
+                                                        //println!("{:?}", msg);
                                                         out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
                                                     }
                                                     Some("lights") => {
@@ -205,7 +208,7 @@ impl WsServer {
                                                             "lights": lights,
                                                             
                                                         });
-                                                        println!("{:?}", msg);
+                                                        //println!("{:?}", msg);
                                                         out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
                                                     }
                                                     Some("pumps") => {
@@ -223,7 +226,7 @@ impl WsServer {
                                                             "pumps": pumps,
                                                             
                                                         });
-                                                        println!("{:?}", msg);
+                                                        //println!("{:?}", msg);
                                                         out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
                                                     },
                                                     Some(&_) => {
@@ -240,6 +243,12 @@ impl WsServer {
                                                 if data["state"] == "enable" {
                                                     task::spawn({
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        let d_clone = data.clone();
+                                                        async move {
+                                                            l_clone.handle.lock().await.pwm(d_clone["duty"].as_f64().unwrap()).await;
+                                                        }
+                                                    });
+                                                    task::spawn({
                                                         let mongo_client_clone = mongo_client.clone();
                                                         async move {
                                                             let db = mongo_client_clone.database("clinostate");
@@ -251,8 +260,6 @@ impl WsServer {
                                                                 "time": format!("{}", local_time)
                                                             };
                                                             coll.insert_one(d,None).await.unwrap();
-                                                            
-                                                            l_clone.handle.lock().await.pwm(data["duty"].as_f64().unwrap()).await;
                                                         }
                                                     });
                                                 } else if data == "disable" {
@@ -283,8 +290,8 @@ impl WsServer {
                                                 
                                                 if data["state"] == "enable" {
                                                     let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
-                                                    let mongo_client_clone = mongo_client.clone();
                                                     
+                                                    let mongo_client_clone = mongo_client.clone();
                                                     let db = mongo_client_clone.database("clinostate");
                                                     let coll = db.collection::<Document>("pumps");
                                                     let local_time: DateTime<Local> = Local::now();
@@ -297,8 +304,8 @@ impl WsServer {
                                                 
                                                 if data["state"] == "disable" {
                                                     let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
-                                                    let mongo_client_clone = mongo_client.clone();
                                                     
+                                                    let mongo_client_clone = mongo_client.clone();
                                                     let db = mongo_client_clone.database("clinostate");
                                                     let coll = db.collection::<Document>("pumps");
                                                     let local_time: DateTime<Local> = Local::now();

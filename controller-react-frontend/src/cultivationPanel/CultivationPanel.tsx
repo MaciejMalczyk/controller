@@ -32,6 +32,7 @@ const CultivationPanelLight = () => {
                     trackClassName="CultivationPanelReactSliderTrack"
                     orientation="vertical"
                     invert
+                    defaultValue={CultivationValues["light"]["value"].value}
                     onChange={(value, index) => {
                         CultivationValues["light"]["value"].setValue(value);
                     }}
@@ -113,6 +114,7 @@ const CultivationPanelPump = () => {
                     trackClassName="CultivationPanelReactSliderTrack"
                     orientation="vertical"
                     invert
+                    defaultValue={CultivationValues["pump"]["value"].value}
                     onChange={(value, index) => {
                         CultivationValues["pump"]["value"].setValue(value);
                     }}
