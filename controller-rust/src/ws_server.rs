@@ -1,11 +1,9 @@
 //use futures_channel::mpsc::{unbounded, UnboundedSender};
 use futures_util::{StreamExt, SinkExt};
-use chrono::prelude::*;
 
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::tungstenite::protocol::Message;
 use tokio::{
-    task,
     sync::{
         Mutex,
         mpsc:: {
@@ -34,7 +32,7 @@ use crate::{
 use mongodb::{
     Client, 
     options::{ClientOptions, FindOptions},
-    bson::{doc, Document}, 
+    bson::{doc, Document, DateTime}, 
 };
 
 
@@ -92,7 +90,7 @@ impl WsServer {
             let mongo_client = Client::with_options(ClientOptions::parse(cfg.get("mongodb").unwrap().as_str().unwrap()).await.unwrap()).unwrap().clone();
 
             
-            let _listener_task = task::spawn({
+            let _listener_task = tokio::spawn({
                 async move {
                     loop {
                         tokio::select! {
@@ -128,30 +126,29 @@ impl WsServer {
                                                 }
                                                 for (id, val) in enable.iter().enumerate() {
                                                     if val == &true {
-                                                        task::spawn({
+                                                        tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             async move {
                                                                 motor_clone.handle.lock().await.set_velocity(speed[id]).await;
                                                                 motor_clone.handle.lock().await.start().await;
                                                                 
                                                             }
-                                                        });
-                                                        task::spawn({
+                                                        }).await.unwrap();
+                                                        tokio::spawn({
                                                             let mongo_client_clone = mongo_client.clone();
                                                             async move {
                                                                 let db = mongo_client_clone.database("clinostate");
                                                                 let coll = db.collection::<Document>("motors");
-                                                                let local_time: DateTime<Local> = Local::now();
                                                                 let d = doc!{
                                                                     format!("motor_{}", &id): "enabled", 
                                                                     "speed": speed[id],
-                                                                    "time": format!("{}", local_time)
+                                                                    "time": DateTime::now()
                                                                 };
                                                                 coll.insert_one(d,None).await.unwrap();
                                                             }
-                                                        });
+                                                        }).await.unwrap();
                                                     } else if val == &false {
-                                                        task::spawn({
+                                                        tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();
                                                             async move {
@@ -159,11 +156,13 @@ impl WsServer {
                                                                 
                                                                 let db = mongo_client_clone.database("clinostate");
                                                                 let coll = db.collection::<Document>("motors");
-                                                                let local_time: DateTime<Local> = Local::now();
-                                                                let d = doc!{format!("motor_{}", &id): "disabled", "time": format!("{}", local_time)};
+                                                                let d = doc!{
+                                                                    format!("motor_{}", &id): "disabled", 
+                                                                    "time": DateTime::now()
+                                                                };
                                                                 coll.insert_one(d,None).await.unwrap();
                                                             }
-                                                        });
+                                                        }).await.unwrap();
                                                     }
                                                 }
                                                 
@@ -241,29 +240,28 @@ impl WsServer {
                                             "light" => {
                                                 let data = message.data.unwrap();
                                                 if data["state"] == "enable" {
-                                                    task::spawn({
+                                                    tokio::spawn({
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
                                                         let d_clone = data.clone();
                                                         async move {
                                                             l_clone.handle.lock().await.pwm(d_clone["duty"].as_f64().unwrap()).await;
                                                         }
                                                     });
-                                                    task::spawn({
+                                                    tokio::spawn({
                                                         let mongo_client_clone = mongo_client.clone();
                                                         async move {
                                                             let db = mongo_client_clone.database("clinostate");
                                                             let coll = db.collection::<Document>("lights");
-                                                            let local_time: DateTime<Local> = Local::now();
                                                             let d = doc!{
                                                                 format!("light_{}", &0): "enabled",
                                                                 "duty": data["duty"].as_i64().unwrap(),
-                                                                "time": format!("{}", local_time)
+                                                                "time": DateTime::now()
                                                             };
                                                             coll.insert_one(d,None).await.unwrap();
                                                         }
-                                                    });
+                                                    }).await.unwrap();
                                                 } else if data == "disable" {
-                                                    task::spawn({
+                                                    tokio::spawn({
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
                                                         let mongo_client_clone = mongo_client.clone();
                                                         async move {
@@ -271,11 +269,13 @@ impl WsServer {
                                                             
                                                             let db = mongo_client_clone.database("clinostate");
                                                             let coll = db.collection::<Document>("lights");
-                                                            let local_time: DateTime<Local> = Local::now();
-                                                            let data = doc!{format!("light_{}", &0): "disabled", "time": format!("{}", local_time)};
+                                                            let data = doc!{
+                                                                format!("light_{}", &0): "disabled", 
+                                                                "time": DateTime::now()
+                                                            };
                                                             coll.insert_one(data,None).await.unwrap();
                                                         }
-                                                    });
+                                                    }).await.unwrap();
                                                 }
                                                 
                                                 
@@ -294,8 +294,11 @@ impl WsServer {
                                                     let mongo_client_clone = mongo_client.clone();
                                                     let db = mongo_client_clone.database("clinostate");
                                                     let coll = db.collection::<Document>("pumps");
-                                                    let local_time: DateTime<Local> = Local::now();
-                                                    let d = doc!{format!("pump_{}", &0): "enabled", "time": format!("{}", local_time)};
+                                                    let d = doc!{
+                                                        format!("pump_{}", &0): "enabled", 
+                                                        "time": DateTime::now()
+                                                        
+                                                    };
                                                     coll.insert_one(d,None).await.unwrap();
                                                     
                                                     p_clone.handle.lock().await.set_from_interface(data["value"].as_f64().unwrap()).await;
@@ -308,8 +311,10 @@ impl WsServer {
                                                     let mongo_client_clone = mongo_client.clone();
                                                     let db = mongo_client_clone.database("clinostate");
                                                     let coll = db.collection::<Document>("pumps");
-                                                    let local_time: DateTime<Local> = Local::now();
-                                                    let d = doc!{format!("pump_{}", &0): "disabled", "time": format!("{}", local_time)};
+                                                    let d = doc!{
+                                                        format!("pump_{}", &0): "disabled", 
+                                                        "time": DateTime::now()
+                                                    };
                                                     coll.insert_one(d,None).await.unwrap();
                                                     
                                                     p_clone.handle.lock().await.stop().await;
