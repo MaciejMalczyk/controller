@@ -142,7 +142,7 @@ impl WsServer {
                                                                 let d = doc!{
                                                                     format!("motor_{}", &id): "enabled", 
                                                                     "speed": speed[id],
-                                                                    "time": DateTime::now()
+                                                                    "date": DateTime::now()
                                                                 };
                                                                 coll.insert_one(d,None).await.unwrap();
                                                             }
@@ -158,7 +158,7 @@ impl WsServer {
                                                                 let coll = db.collection::<Document>("motors");
                                                                 let d = doc!{
                                                                     format!("motor_{}", &id): "disabled", 
-                                                                    "time": DateTime::now()
+                                                                    "date": DateTime::now()
                                                                 };
                                                                 coll.insert_one(d,None).await.unwrap();
                                                             }
@@ -255,7 +255,7 @@ impl WsServer {
                                                             let d = doc!{
                                                                 format!("light_{}", &0): "enabled",
                                                                 "duty": data["duty"].as_i64().unwrap(),
-                                                                "time": DateTime::now()
+                                                                "date": DateTime::now()
                                                             };
                                                             coll.insert_one(d,None).await.unwrap();
                                                         }
@@ -271,7 +271,7 @@ impl WsServer {
                                                             let coll = db.collection::<Document>("lights");
                                                             let data = doc!{
                                                                 format!("light_{}", &0): "disabled", 
-                                                                "time": DateTime::now()
+                                                                "date": DateTime::now()
                                                             };
                                                             coll.insert_one(data,None).await.unwrap();
                                                         }
@@ -296,7 +296,7 @@ impl WsServer {
                                                     let coll = db.collection::<Document>("pumps");
                                                     let d = doc!{
                                                         format!("pump_{}", &0): "enabled", 
-                                                        "time": DateTime::now()
+                                                        "date": DateTime::now()
                                                         
                                                     };
                                                     coll.insert_one(d,None).await.unwrap();
@@ -313,7 +313,7 @@ impl WsServer {
                                                     let coll = db.collection::<Document>("pumps");
                                                     let d = doc!{
                                                         format!("pump_{}", &0): "disabled", 
-                                                        "time": DateTime::now()
+                                                        "date": DateTime::now()
                                                     };
                                                     coll.insert_one(d,None).await.unwrap();
                                                     
