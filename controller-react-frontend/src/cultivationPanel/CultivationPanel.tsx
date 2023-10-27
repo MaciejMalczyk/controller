@@ -65,7 +65,6 @@ const CultivationPanelLight = () => {
                                 duty: CultivationValues["light"]["value"].value,
                             }
                         });
-                        console.log("start");
                         lightEnabledStateSet(1);
                     }
                 }}></Button>
@@ -81,7 +80,6 @@ const CultivationPanelLight = () => {
                             action: "light",
                             data: "disable"
                         });
-                        console.log("stop");
                         lightEnabledStateSet(2);
                     }
                 }}></Button>

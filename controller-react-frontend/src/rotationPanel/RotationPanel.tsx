@@ -49,7 +49,14 @@ const InfoPanel = () => {
                     onclick: () => {
                         WebsocketServers[0].send({
                             action: "motors", data: {
-                                enable: [true, true], speed: [MotorValues[0].velocity.value, MotorValues[1].velocity.value]
+                                0: {
+                                    en: true,
+                                    spd: MotorValues[0].velocity.value,
+                                },
+                                1: {
+                                    en: true,
+                                    spd: MotorValues[1].velocity.value,
+                                }
                             }
                         });
                         isEnabledStateSet(1);
@@ -65,7 +72,14 @@ const InfoPanel = () => {
                     onclick: () => {
                         WebsocketServers[0].send({
                             action: "motors", data: {
-                                enable: [false, false], speed: [MotorValues[0].velocity.value, MotorValues[1].velocity.value]
+                                0: {
+                                    en: false,
+                                    spd: MotorValues[0].velocity.value,
+                                },
+                                1: {
+                                    en: false,
+                                    spd: MotorValues[1].velocity.value,
+                                }
                             }
                         });
                         isEnabledStateSet(2);

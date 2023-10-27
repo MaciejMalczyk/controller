@@ -108,46 +108,37 @@ impl WsServer {
                                         let action = message.action.as_str();
                                         match action {
                                             "motors" => {
-                                                let data = message.data.unwrap();
-                                                let mut enable: [bool; 2] = [false, false];
-                                                let mut speed: [f64; 2] = [0.0, 0.0];
-                                                for (k, v) in data.as_object().unwrap() {
-                                                    //println!("{:?}", data.as_object().unwrap());
-                                                    let mut iter = 0;
-                                                    for i in v.as_array().unwrap() {
-                                                        if k == "enable" {
-                                                            enable[iter] = i.as_bool().unwrap();
-                                                            iter += 1;
-                                                        } else if k == "speed" {
-                                                            speed[iter] = i.as_f64().unwrap();
-                                                            iter += 1;
-                                                        }
-                                                    }
-                                                }
-                                                for (id, val) in enable.iter().enumerate() {
-                                                    if val == &true {
+                                                let d = message.data.unwrap();
+                                                let data = d.as_object().unwrap();
+                                                println!("{:?}", data);
+                                                for (id, val) in data.iter().enumerate() {
+                                                    let params = val.1.as_object().unwrap();
+                                                    println!("{:?}|{:?}", id, params);
+                                                    if params["en"].as_bool().unwrap() == true {
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
+                                                            let speed_clone = params["spd"].as_f64().unwrap();
                                                             async move {
-                                                                motor_clone.handle.lock().await.set_velocity(speed[id]).await;
+                                                                motor_clone.handle.lock().await.set_velocity(speed_clone).await;
                                                                 motor_clone.handle.lock().await.start().await;
                                                                 
                                                             }
                                                         }).await.unwrap();
                                                         tokio::spawn({
                                                             let mongo_client_clone = mongo_client.clone();
+                                                            let speed_clone = params["spd"].as_f64().unwrap();
                                                             async move {
                                                                 let db = mongo_client_clone.database("clinostate");
                                                                 let coll = db.collection::<Document>("motors");
                                                                 let d = doc!{
                                                                     format!("motor_{}", &id): "enabled", 
-                                                                    "speed": speed[id],
+                                                                    "speed": speed_clone,
                                                                     "date": DateTime::now()
                                                                 };
                                                                 coll.insert_one(d,None).await.unwrap();
                                                             }
                                                         }).await.unwrap();
-                                                    } else if val == &false {
+                                                    } else if params["en"].as_bool().unwrap() == false {
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();
@@ -183,7 +174,7 @@ impl WsServer {
                                                                 "enabled": val.clone().handle.lock().await.get_enable().await,
                                                                 "n": _n,
                                                             });
-                                                            motors.push(motor);
+                                                            motors.insert(*_n as usize, motor);
                                                         }
                                                         let msg = json!({
                                                             "action": "state",

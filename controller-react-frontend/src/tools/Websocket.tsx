@@ -1,13 +1,17 @@
 import MotorValues from '../tools/MotorValues';
 import CultivationValues from '../tools/CultivationValues';
+import StateBool from '../tools/StateBool';
+
 
 class Websocket {
     ws: WebSocket;
     address: string;
+    connected: StateBool;
     
     constructor(address: string) {
         this.address = address;
         this.ws = this.start();
+        this.connected = new StateBool(false);
     }
     
     start() {
@@ -23,11 +27,13 @@ class Websocket {
             setInterval(()=>{
                 this.send({action:"ping"});
             },2000)
+            this.connected.setValue(true);
         }
         
         this.ws.onmessage = (msg) => {
+            
             let data = JSON.parse(msg.data);
-            //console.log(data);
+//             console.log(data);
             if (data.action === "state") {
                 if (data.motors) {
                     Object.keys(data.motors).forEach((it) => {
@@ -46,7 +52,7 @@ class Websocket {
         this.ws.onclose = () => {
             setTimeout(()=>{
                 this.start();
-            },100);
+            },200);
         }
         return this.ws;
     }
@@ -59,6 +65,7 @@ class Websocket {
 }
 
 let WebsocketServers: { [key: number]: Websocket } = [];
+console.log(WebsocketServers);
 
 function InitWs(address: string, id: number) {
     WebsocketServers[id] = new Websocket(address);
