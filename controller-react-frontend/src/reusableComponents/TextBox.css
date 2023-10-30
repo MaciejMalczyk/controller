@@ -10,7 +10,7 @@
 .TextBoxText {
     font-size: 40px;
     text-align: center;
-    font-family: Josefin Sans;
+    font-family: JosefinSans;
     grid-row: 2/3;
     grid-column: 2/3;
     color: white;
