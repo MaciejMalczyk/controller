@@ -73,7 +73,7 @@ impl WsServer {
             //listen for connection
             let cfg = config::read();
             
-            println!("New connection: {}", addr);
+            println!("New connection: {} | {}", addr, DateTime::now());
             
             //await handshake of websocket connection
             let websocket_stream = tokio_tungstenite::accept_async(raw_stream)
@@ -81,7 +81,7 @@ impl WsServer {
                 .expect("Handshake error");
             
             //if hanshake is ok, print that is ok
-            println!("Connection established: {}", addr);
+            println!("Connection established: {} | {}", addr, DateTime::now());
             
             let (tx, _rx) = unbounded_channel::<Message>();
             peer_map.lock().await.insert(addr, tx);
@@ -110,10 +110,10 @@ impl WsServer {
                                             "motors" => {
                                                 let d = message.data.unwrap();
                                                 let data = d.as_object().unwrap();
-                                                println!("{:?}", data);
+                                                // println!("{:?}", data);
                                                 for (id, val) in data.iter().enumerate() {
                                                     let params = val.1.as_object().unwrap();
-                                                    println!("{:?}|{:?}", id, params);
+                                                    // println!("{:?}|{:?}", id, params);
                                                     if params["en"].as_bool().unwrap() == true {
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
@@ -275,8 +275,9 @@ impl WsServer {
                                                 let data = message.data.unwrap();
                                                 
                                                 if data["type"] == "cultivation" {
-                                                    let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();                                                    
+                                                    let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();                                              
                                                     p_clone.handle.lock().await.set_moisture(data["value"].as_f64().unwrap()).await;
+                                                    println!("SENSOR MOISTURE: {}", data["value"].as_f64().unwrap());
                                                 }
                                                 
                                                 if data["state"] == "enable" {

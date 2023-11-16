@@ -51,8 +51,9 @@ impl Pump {
             let enable_clone = Arc::clone(&self.enable);
             async move {
                 loop {
-                    if *m.lock().await > 0.0 && *fi.lock().await > *m.lock().await {
+                    if *m.lock().await >= 0.0 && *fi.lock().await > *m.lock().await {
                         pin_clone.lock().await.set(255).unwrap();
+                        println!("PUMP ON");
                         sleep(Duration::from_secs(2)).await;
                         pin_clone.lock().await.set(0).unwrap();
                     }
