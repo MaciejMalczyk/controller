@@ -11,7 +11,9 @@ Rust and cargo: https://www.rust-lang.org/tools/install
 Node.js: https://nodejs.org/en
 
 ### Hardware
-Any SBC with libgpio kernel driver enabled. Any 2 stepper motors with any 2 stepper drivers that utilizes "step pin" for motor stepping.
+Raspberry Pi with built in PWM generator (needs to be enabled with dtoverlay=pwm-2chan in /boot/config.txt).
+
+Any 2 stepper motors with any 2 stepper drivers that utilizes "step pin" for motor stepping. 
 
 ## Build 
 Go into controller-rust and run `cargo build` to build backend
