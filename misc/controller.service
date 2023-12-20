@@ -1,0 +1,11 @@
+[Unit]
+Description=Controller service
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+WorkingDirectory=/home/golf/controller/controller-rust/target/debug/
+ExecStart=/home/golf/controller/controller-rust/target/debug/controller
+
+[Install]
+WantedBy=multi-user.target 
