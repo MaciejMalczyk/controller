@@ -169,15 +169,15 @@ impl WsServer {
                                                 let device = data.as_str();
                                                 match device {
                                                     Some("motors") => {
-                                                        let mut motors = vec![];
-                                                        for (_n,val) in devices.motors.iter_mut() {
+                                                        //temporary solved
+                                                        let mut motors: [serde_json::Value; 2] = [json!({}),json!({})];
+                                                        for (_n,val) in devices.motors.iter() {
                                                             let motor = json!({
                                                                 "speed": val.clone().handle.lock().await.get_velocity().await,
                                                                 "enabled": val.clone().handle.lock().await.get_enable().await,
                                                                 "n": _n,
                                                             });
-                                                            // motors.insert(*_n as usize, motor);
-                                                            motors.push(motor);
+                                                            motors[*_n as usize] = motor;
                                                         }
                                                         let msg = json!({
                                                             "action": "state",
