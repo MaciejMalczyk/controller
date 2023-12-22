@@ -71,7 +71,6 @@ impl WsServer {
         
         async fn connection(peer_map: PeerMap, raw_stream: TcpStream, addr: SocketAddr, mut devices: Devices) {
             //listen for connection
-            let cfg = config::read();
             
             println!("New connection: {} | {}", addr, DateTime::now());
             
@@ -87,8 +86,8 @@ impl WsServer {
             peer_map.lock().await.insert(addr, tx);
             let (mut out, mut inc) = websocket_stream.split();
             
-            let mongo_client = Client::with_options(ClientOptions::parse(cfg.get("mongodb").unwrap().as_str().unwrap()).await.unwrap()).unwrap().clone();
-            let parent_device = cfg.get("device").unwrap().as_str().unwrap();
+            let cfg = Arc::new(Mutex::new(config::read()));
+            let mongo_client = Client::with_options(ClientOptions::parse(cfg.lock().await.get("mongodb").unwrap().as_str().unwrap()).await.unwrap()).unwrap().clone();
 
             
             let _listener_task = tokio::spawn({
@@ -128,9 +127,9 @@ impl WsServer {
                                                         tokio::spawn({
                                                             let mongo_client_clone = mongo_client.clone();
                                                             let speed_clone = params["spd"].as_f64().unwrap();
-                                                            let parent_dev_clone = parent_device.clone();
+                                                            let cfg_clone = cfg.clone();
                                                             async move {
-                                                                let db = mongo_client_clone.database(parent_device.clone(););
+                                                                let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                                 let coll = db.collection::<Document>("motors");
                                                                 let d = doc!{
                                                                     format!("motor_{}", &id): "enabled", 
@@ -144,11 +143,11 @@ impl WsServer {
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();
-                                                            let parent_dev_clone = parent_device.clone();
+                                                            let cfg_clone = cfg.clone();
                                                             async move {
                                                                 motor_clone.handle.lock().await.stop().await;
                                                                 
-                                                                let db = mongo_client_clone.database(parent_device.clone(););
+                                                                let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                                 let coll = db.collection::<Document>("motors");
                                                                 let d = doc!{
                                                                     format!("motor_{}", &id): "disabled", 
@@ -177,7 +176,8 @@ impl WsServer {
                                                                 "enabled": val.clone().handle.lock().await.get_enable().await,
                                                                 "n": _n,
                                                             });
-                                                            motors.insert(*_n as usize, motor);
+                                                            // motors.insert(*_n as usize, motor);
+                                                            motors.push(motor);
                                                         }
                                                         let msg = json!({
                                                             "action": "state",
@@ -243,9 +243,9 @@ impl WsServer {
                                                     });
                                                     tokio::spawn({
                                                         let mongo_client_clone = mongo_client.clone();
-                                                        let parent_dev_clone = parent_device.clone();
+                                                        let cfg_clone = cfg.clone();
                                                         async move {
-                                                            let db = mongo_client_clone.database(parent_device.clone(););
+                                                            let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                             let coll = db.collection::<Document>("lights");
                                                             let d = doc!{
                                                                 format!("light_{}", &0): "enabled",
@@ -259,11 +259,11 @@ impl WsServer {
                                                     tokio::spawn({
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
                                                         let mongo_client_clone = mongo_client.clone();
-                                                        let parent_dev_clone = parent_device.clone();
+                                                        let cfg_clone = cfg.clone();
                                                         async move {
                                                             l_clone.handle.lock().await.stop().await;
                                                             
-                                                            let db = mongo_client_clone.database(parent_device.clone(););
+                                                            let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                             let coll = db.collection::<Document>("lights");
                                                             let data = doc!{
                                                                 format!("light_{}", &0): "disabled", 
@@ -289,7 +289,7 @@ impl WsServer {
                                                     let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
                                                     
                                                     let mongo_client_clone = mongo_client.clone();
-                                                    let db = mongo_client_clone.database(parent_device.clone(););
+                                                    let db = mongo_client_clone.database(cfg.lock().await.get("device").unwrap().as_str().unwrap());
                                                     let coll = db.collection::<Document>("pumps");
                                                     let d = doc!{
                                                         format!("pump_{}", &0): "enabled", 
@@ -306,8 +306,7 @@ impl WsServer {
                                                     let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
                                                     
                                                     let mongo_client_clone = mongo_client.clone();
-                                                    let parent_dev_clone = parent_device.clone();
-                                                    let db = mongo_client_clone.database(parent_device.clone(););
+                                                    let db = mongo_client_clone.database(cfg.lock().await.get("device").unwrap().as_str().unwrap());
                                                     let coll = db.collection::<Document>("pumps");
                                                     let d = doc!{
                                                         format!("pump_{}", &0): "disabled", 

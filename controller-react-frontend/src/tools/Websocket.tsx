@@ -21,9 +21,11 @@ class Websocket {
         }
         
         this.ws.onopen = () => {
-            this.send({action:"state", data: "motors"});
-            this.send({action:"state", data: "lights"});
-            this.send({action:"state", data: "pumps"});
+            setTimeout(()=>{
+                this.send({action:"state", data: "motors"});
+                this.send({action:"state", data: "lights"});
+                this.send({action:"state", data: "pumps"});
+            },200)
             setInterval(()=>{
                 if (this.ws.readyState == 1) {
                     this.send({action:"ping"});
@@ -54,7 +56,7 @@ class Websocket {
         this.ws.onclose = () => {
             setTimeout(()=>{
                 this.start();
-            },200);
+            },1000);
         }
         return this.ws;
     }
