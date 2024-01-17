@@ -3,10 +3,10 @@
     height: 160px;
     border-radius: 24px;
     display: grid;
-    grid-template-rows: 5% 65% auto;
+    grid-template-rows: 10% 55% auto;
 }
 .NumDisplayValue {
-    font-size: 116px;
+    font-size: 90px;
     text-align: center;
     font-family: JosefinSans-SemiBold;
     grid-row: 2/3;

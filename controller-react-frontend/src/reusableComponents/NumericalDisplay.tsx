@@ -1,52 +1,44 @@
 import React, { createRef, useEffect, RefObject } from 'react';
 import './NumericalDisplay.css';
 
-interface NumDisplayProps {
-    config: {
-        backgroundColor?: string,
-        fontColor?: string,
-        param?: any,
-        unit?: string,
-    }
-}
+type NumDisplayProps = {
+    backgroundColor?: string,
+    fontColor?: string,
+    param: any,
+    unit?: string,
+    fixedPositions?: number,
+};
 
-const NumDisplay = ( props: NumDisplayProps ) => {
-    
-    let pass: {
-        backgroundColor?: string,
-        fontColor?: string,
-        param: any,
-        unit?: string,
-    } = {
-        backgroundColor: props.config.backgroundColor || "#373737",
-        fontColor: props.config.fontColor || "#ffffff",
-        param: props.config.param || 999,
-        unit: props.config.unit || "/",
-    }
-    
+const NumDisplay = ({
+    backgroundColor = "#373737",
+    fontColor = "#ffffff",
+    param = 999,
+    unit = "/",
+    fixedPositions = 2,
+}: NumDisplayProps ) => {    
     
     const NumDisplayRef: RefObject<HTMLDivElement> = createRef();
     const NumDisplayValueRef: RefObject<HTMLDivElement> = createRef();
     const NumDisplayUnitRef: RefObject<HTMLDivElement> = createRef();
     
     useEffect(() => {
-        window.addEventListener(pass.param.event, () => {
+        window.addEventListener(param.event, () => {
             if (NumDisplayValueRef.current) {
-                if (pass.param.value % 1 !== 0) {
-                    NumDisplayValueRef.current!.innerText = `${pass.param.value.toFixed(2)}`;
+                if (param.value % 1 !== 0) {
+                    NumDisplayValueRef.current!.innerText = `${param.value.toFixed(fixedPositions)}`;
                 } else {
-                    NumDisplayValueRef.current!.innerText = `${pass.param.value}`;
+                    NumDisplayValueRef.current!.innerText = `${param.value}`;
                 }
             }
         });
-        if (pass.backgroundColor) {
-            NumDisplayRef.current!.style.background = pass.backgroundColor;
+        if (backgroundColor) {
+            NumDisplayRef.current!.style.background = backgroundColor;
         }
-        if (pass.fontColor) {
-            NumDisplayValueRef.current!.style.color = pass.fontColor;
+        if (fontColor) {
+            NumDisplayValueRef.current!.style.color = fontColor;
         }
-        if (pass.unit) {
-            NumDisplayUnitRef.current!.innerText = pass.unit;
+        if (unit) {
+            NumDisplayUnitRef.current!.innerText = unit;
         }
         
     });

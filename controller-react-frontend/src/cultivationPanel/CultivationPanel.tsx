@@ -39,10 +39,10 @@ const CultivationPanelLight = () => {
                 />
             </div>
             <div className="CultivationPanelLightdutyValue">
-                <NumDisplay config={{
-                    param: CultivationValues["light"]["value"],
-                    unit: "%",
-                }}></NumDisplay>
+                <NumDisplay
+                    param={CultivationValues["light"]["value"]}
+                    unit="%"
+                ></NumDisplay>
             </div>
             <div className="CultivationPanelLightTagName">
                 <TextBox 
@@ -120,10 +120,10 @@ const CultivationPanelPump = () => {
             </div>
             <div className="CultivationPanelPumpValues">
                 <div className="CultivationPanelPumpTonValue">
-                    <NumDisplay config={{
-                        param: CultivationValues["pump"]["value"], 
-                        unit: "%",
-                    }}></NumDisplay>
+                    <NumDisplay
+                        param={CultivationValues["pump"]["value"]} 
+                        unit="%"
+                    ></NumDisplay>
                 </div>
             </div>
             <div className="CultivationPanelPumpTagName">

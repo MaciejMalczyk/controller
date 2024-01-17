@@ -29,16 +29,18 @@ const InfoPanel = () => {
     return (
         <div className="RotationInfoPanel">
             <div className="RotationPanelNumericalDisplayLeft">
-                <NumDisplay config={{
-                    param: MotorValues[0].velocity,
-                    unit: "1/s",
-                }}></NumDisplay>
+                <NumDisplay
+                    param={MotorValues[0].velocity}
+                    unit="1/s"
+                    fixedPositions={3}
+                ></NumDisplay>
             </div>
             <div className="RotationPanelNumericalDisplayRight">
-                <NumDisplay config={{
-                    param: MotorValues[1].velocity,
-                    unit: "1/s",
-                }}></NumDisplay>
+                <NumDisplay
+                    param={MotorValues[1].velocity}
+                    unit="1/s"
+                    fixedPositions={3}
+                ></NumDisplay>
             </div>
             <div className="RotationPanelButtonStart">
                 <Button config={{
@@ -116,8 +118,8 @@ const RotationPanel = () => {
                         trackClassName="RotationPanelReactSliderTrack"
                         orientation="vertical"
                         invert
-                        max={0.4}
-                        step={0.01}
+                        max={0.55}
+                        step={0.005}
                         defaultValue={MotorValues[0]["velocity"].value}
                         onChange={(value, index) => {
                             MotorValues[0]["velocity"].setValue(value);
@@ -131,8 +133,8 @@ const RotationPanel = () => {
                         trackClassName="RotationPanelReactSliderTrack"
                         orientation="vertical"
                         invert
-                        max={0.4}
-                        step={0.01}
+                        max={0.55}
+                        step={0.005}
                         defaultValue={MotorValues[1]["velocity"].value}
                         onChange={(value, index) => {
                             MotorValues[1]["velocity"].setValue(value);
