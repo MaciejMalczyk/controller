@@ -44,20 +44,28 @@ impl Pump {
     
     pub async fn start(&mut self) {
         *self.enable.lock().await = true;
+        
         tokio::spawn({
             let pin_clone = Arc::clone(&self.pin);
             let fi = Arc::clone(&self.from_interface);
             let m = Arc::clone(&self.moisture);
             let enable_clone = Arc::clone(&self.enable);
             async move {
+                let mut old_moisture = 0.0;
                 loop {
                     if *enable_clone.lock().await == false {
+                        println!("PUMP OFF");
+                        break;
+                    }
+                    if old_moisture == *fi.lock().await {
+                        println!("MOISTURE SENSOR ERROR");
                         break;
                     }
                     if *m.lock().await >= 0.0 && *fi.lock().await > *m.lock().await {
                         pin_clone.lock().await.set(255).unwrap();
                         println!("PUMP ON");
                         sleep(Duration::from_secs(2)).await;
+                        old_moisture = *fi.lock().await;
                         pin_clone.lock().await.set(0).unwrap();
                     }
                     sleep(Duration::from_secs(120)).await;
