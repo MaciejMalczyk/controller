@@ -80,7 +80,7 @@ impl Pump {
                             pin_clone.lock().await.set(0).unwrap();
                             println!("PUMP STOP");
                         }
-                        sleep(Duration::from_secs(300)).await;
+                        sleep(Duration::from_secs(1200)).await;
                     }
                     
                 };
