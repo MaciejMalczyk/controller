@@ -31,7 +31,7 @@ use crate::{
 
 use mongodb::{
     Client, 
-    options::{ClientOptions, FindOptions},
+    options::{ClientOptions},
     bson::{doc, Document, DateTime}, 
 };
 
@@ -49,10 +49,10 @@ struct MotorMsg {
 }
 
 impl WsServer {
-    pub fn init(state: PeerMap, devices: Devices ) -> WsServer {
+    pub fn init(st: PeerMap, devs: Devices ) -> WsServer {
         WsServer {
-            state: state,
-            devices: devices,
+            state: st,
+            devices: devs,
         }
     }
         
@@ -101,7 +101,7 @@ impl WsServer {
                                         break;
                                     },
                                     Some(msg) => {
-                                        let message: MotorMsg = match serde_json::from_str::<MotorMsg>(&msg.unwrap().to_text().unwrap()) {
+                                        let message: MotorMsg = match serde_json::from_str::<MotorMsg>(msg.unwrap().to_text().unwrap()) {
                                             Ok(m) => { m },
                                             Err(_) => { todo!() }
                                         };
@@ -114,7 +114,7 @@ impl WsServer {
                                                 for (id, val) in data.iter().enumerate() {
                                                     let params = val.1.as_object().unwrap();
                                                     // println!("{:?}|{:?}", id, params);
-                                                    if params["en"].as_bool().unwrap() == true {
+                                                    if params["en"].as_bool().unwrap() {
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let speed_clone = params["spd"].as_f64().unwrap();
@@ -139,7 +139,7 @@ impl WsServer {
                                                                 coll.insert_one(d,None).await.unwrap();
                                                             }
                                                         }).await.unwrap();
-                                                    } else if params["en"].as_bool().unwrap() == false {
+                                                    } else if !params["en"].as_bool().unwrap() {
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();

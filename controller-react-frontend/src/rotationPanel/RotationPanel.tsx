@@ -1,12 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './RotationPanel.css'; 
-import Slider from '../reusableComponents/Slider';
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
 import TextBox from '../reusableComponents/TextBox';
 import MotorValues from '../tools/MotorValues';
 import { WebsocketServers } from '../tools/Websocket';
-import config from '../config.json';
 import ReactSlider from "react-slider"
 
 const InfoPanel = () => {

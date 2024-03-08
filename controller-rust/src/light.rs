@@ -11,12 +11,11 @@ pub struct Light {
 
 impl Light {
     pub fn init(freq: f64) -> Light {
-        let l = Light {
+        Light {
             status: Arc::new(Mutex::new(false)),
             pwm: Arc::new(Mutex::new(Pwm::with_frequency(Channel::Pwm0, freq, 0.0, Polarity::Normal, false).unwrap())),
             duty: Arc::new(Mutex::new(0.0)),
-        };
-        l
+        }
     }
     
     pub async fn get_duty(&mut self) -> f64 {

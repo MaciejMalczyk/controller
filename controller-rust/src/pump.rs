@@ -14,14 +14,13 @@ pub struct Pump {
 
 impl Pump {
     pub fn init(chip: &gpio::GpioChip, pin: u32) -> Pump {
-        let p = Pump {
+        Pump {
             pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
             enable: Arc::new(Mutex::new(false)),
             moisture: Arc::new(Mutex::new(0.0)),
             from_interface: Arc::new(Mutex::new(0.0)),
             from_cultivation: Arc::new(Mutex::new(true)),
-        };
-        p
+        }
     }
     
     pub async fn set_moisture(&mut self, moisture: f64) {
@@ -60,7 +59,7 @@ impl Pump {
                     loop {
                         *fc_clone.lock().await = false;
                         sleep(Duration::from_secs(150)).await;
-                        if *fc_clone.lock().await == false {
+                        if !(*fc_clone.lock().await) {
                             println!("SENSOR FAILURE");
                             *enable_clone.lock().await = false;
                             break;
@@ -70,7 +69,7 @@ impl Pump {
                 
                 let process = async {
                     loop {
-                        if *enable_clone.lock().await == false {
+                        if !(*enable_clone.lock().await) {
                             println!("PUMP OFF");
                             break;
                         }

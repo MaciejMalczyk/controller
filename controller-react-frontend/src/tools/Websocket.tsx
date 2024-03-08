@@ -27,7 +27,7 @@ class Websocket {
                 this.send({action:"state", data: "pumps"});
             },200)
             setInterval(()=>{
-                if (this.ws.readyState == 1) {
+                if (this.ws.readyState === 1) {
                     this.send({action:"ping"});
                 }
             },2000)

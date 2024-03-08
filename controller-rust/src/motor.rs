@@ -24,15 +24,14 @@ pub struct Motor {
 
 impl Motor {
     pub fn init(chip: &gpio::GpioChip, step_pin: u32, stop_pin: u32) -> Motor {
-        let m = Motor { 
+        Motor { 
             enable: Arc::new(Mutex::new(false)),
             pin: Arc::new(Mutex::new(chip.request(format!("gpioM_{}",step_pin).as_str(), gpio::RequestFlags::OUTPUT,  step_pin, 0).unwrap())),
             stop: Arc::new(Mutex::new(chip.request(format!("gpioS_{}",stop_pin).as_str(), gpio::RequestFlags::OUTPUT,  stop_pin, 1).unwrap())),
             divider: Arc::new(Mutex::new(0.0)),
             slope: Arc::new(Mutex::new(0.0)),
             velocity: Arc::new(Mutex::new(0.0)),
-        };
-        m
+        }
     }
     
     pub async fn set_velocity(&mut self, vel: f64) {
@@ -65,13 +64,13 @@ impl Motor {
                 let mut interval = Duration::from_micros(1000000/(divider as u64));
                 stop_clone.lock().await.set(0).unwrap();
                 loop {
-                    if *enable_clone.lock().await == true {
+                    if *enable_clone.lock().await {
                         if *divider_clone.lock().await >= divider {
                             pin_clone.lock().await.set(255).unwrap();
                             sleep(interval);
                             pin_clone.lock().await.set(0).unwrap();
                             sleep(interval);
-                            divider = divider*1.01;
+                            divider *= 1.01;
                             interval = Duration::from_micros(1000000/(divider as u64));
                         } else {
                             pin_clone.lock().await.set(255).unwrap();
@@ -79,13 +78,13 @@ impl Motor {
                             pin_clone.lock().await.set(0).unwrap();
                             sleep(interval);
                         }
-                    } else {
+                    } else if !(*enable_clone.lock().await) {
                         if divider >= *slope_clone.lock().await {
                             pin_clone.lock().await.set(255).unwrap();
                             sleep(interval);
                             pin_clone.lock().await.set(0).unwrap();
                             sleep(interval);
-                            divider = divider*0.99;
+                            divider *= 0.99;
                             interval = Duration::from_micros(1000000/(divider as u64));
                         } else {
                             stop_clone.lock().await.set(1).unwrap();

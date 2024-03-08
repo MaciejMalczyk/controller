@@ -1,4 +1,4 @@
-import React, { createRef, RefObject, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Main.css';
 import Switch from './Switch';
 import Loading from './Loading';
@@ -16,7 +16,7 @@ const Main = () => {
     const [connected, setConnected] = useState(false);
     
     useEffect(()=>{
-        addEventListener(WebsocketServers[0].connected.event, ()=>{
+        window.addEventListener(WebsocketServers[0].connected.event, ()=>{
             setConnected(true);
         })
     })

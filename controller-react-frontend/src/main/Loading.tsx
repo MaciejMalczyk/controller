@@ -1,4 +1,4 @@
-import React, { createRef, RefObject, useEffect, useState } from 'react';
+import React, { createRef, RefObject, useEffect } from 'react';
 import "./Loading.css";
 import Icons from '../tools/svg/Icons';
 

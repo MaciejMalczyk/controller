@@ -62,9 +62,6 @@ async fn main() {
 	});
 	
 	
-	match ws_server_task.await {
-		Err(e) => println!("{:?}", e),
-		_ => ()
-	}
+	if let Err(e) = ws_server_task.await { println!("{:?}", e) }
 	
 }

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './CultivationPanel.css';
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
 import TextBox from '../reusableComponents/TextBox';
 import CultivationValues from '../tools/CultivationValues';
 import { WebsocketServers } from '../tools/Websocket';
-import config from '../config.json';
 import ReactSlider from "react-slider"
 
 const CultivationPanelLight = () => {
