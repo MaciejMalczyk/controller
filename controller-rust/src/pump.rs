@@ -45,56 +45,61 @@ impl Pump {
     }
     
     pub async fn start(&mut self) {
-        println!("PUMP ON");
-        *self.enable.lock().await = true;
-        
-        tokio::spawn({
-            let enable_clone = Arc::clone(&self.enable);
-            let pin_clone = Arc::clone(&self.pin);
-            let fi_clone = Arc::clone(&self.from_interface);
-            let moisture_clone = Arc::clone(&self.moisture);
-            let fc_clone = Arc::clone(&self.from_cultivation);
-            async move {
-                let watchdog = async {
-                    loop {
-                        *fc_clone.lock().await = false;
-                        sleep(Duration::from_secs(150)).await;
-                        if !(*fc_clone.lock().await) {
-                            println!("SENSOR FAILURE");
-                            *enable_clone.lock().await = false;
-                            break;
-                        }
-                    }
-                };
-                
-                let process = async {
-                    loop {
-                        if !(*enable_clone.lock().await) {
-                            println!("PUMP OFF");
-                            break;
-                        }
-                        if *moisture_clone.lock().await >= 0.0 && *fi_clone.lock().await > *moisture_clone.lock().await {
-                            pin_clone.lock().await.set(255).unwrap();
-                            println!("PUMP PUSH");
-                            sleep(Duration::from_secs(2)).await;
-                            pin_clone.lock().await.set(0).unwrap();
-                            println!("PUMP STOP");
-                        }
-                        sleep(Duration::from_secs(1200)).await;
-                    }
+        if !(*self.enable.lock().await) {
+            *self.enable.lock().await = true;
+            println!("PUMP ON");
+            
+            tokio::spawn({
+                let enable_clone = Arc::clone(&self.enable);
+                let pin_clone = Arc::clone(&self.pin);
+                let fi_clone = Arc::clone(&self.from_interface);
+                let moisture_clone = Arc::clone(&self.moisture);
+                let fc_clone = Arc::clone(&self.from_cultivation);
+                async move {
                     
-                };
-                
-                tokio::join!(
-                    process,
-                    watchdog,
-                );
-                
-            }
-        });
+                    let watchdog = async {
+                        loop {
+                            *fc_clone.lock().await = false;
+                            sleep(Duration::from_secs(150)).await;
+                            if !(*fc_clone.lock().await) {
+                                println!("SENSOR FAILURE");
+                                *enable_clone.lock().await = false;
+                                break;
+                            }
+                        }
+                    };
+                    
+                    let process = async {
+                        loop {
+                            if !(*enable_clone.lock().await) {
+                                println!("PUMP OFF");
+                                break;
+                            }
+                            if *moisture_clone.lock().await >= 0.0 && *fi_clone.lock().await > *moisture_clone.lock().await {
+                                pin_clone.lock().await.set(255).unwrap();
+                                println!("PUMP PUSH");
+                                sleep(Duration::from_secs(2)).await;
+                                pin_clone.lock().await.set(0).unwrap();
+                                println!("PUMP STOP");
+                            }
+                            sleep(Duration::from_secs(300)).await;
+                        }
+                        
+                    };
+                    
+                    tokio::join!(
+                        process,
+                        watchdog,
+                    );
+                    
+                }
+            });
+        } else { }
     }
     
     pub async fn stop(&mut self) {
-       *self.enable.lock().await = false; 
+        if *self.enable.lock().await {
+            *self.enable.lock().await = false;
+        }
     }
 }

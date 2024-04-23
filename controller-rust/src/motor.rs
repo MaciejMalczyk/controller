@@ -51,51 +51,55 @@ impl Motor {
     }
     
     pub async fn start(&mut self) {
-        *self.enable.lock().await = true;
-        tokio::spawn({
-            let pin_clone = Arc::clone(&self.pin);
-            let enable_clone = Arc::clone(&self.enable);
-            let divider_clone = Arc::clone(&self.divider);
-            let slope_clone = Arc::clone(&self.slope);
-            let stop_clone = Arc::clone(&self.stop);
-            async move {
-                //add slope for start and stop
-                let mut divider = *slope_clone.lock().await;
-                let mut interval = Duration::from_micros(1000000/(divider as u64));
-                stop_clone.lock().await.set(0).unwrap();
-                loop {
-                    if *enable_clone.lock().await {
-                        if *divider_clone.lock().await >= divider {
-                            pin_clone.lock().await.set(255).unwrap();
-                            sleep(interval);
-                            pin_clone.lock().await.set(0).unwrap();
-                            sleep(interval);
-                            divider *= 1.01;
-                            interval = Duration::from_micros(1000000/(divider as u64));
+        if !(*self.enable.lock().await) {
+            *self.enable.lock().await = true;
+            tokio::spawn({
+                let pin_clone = Arc::clone(&self.pin);
+                let enable_clone = Arc::clone(&self.enable);
+                let divider_clone = Arc::clone(&self.divider);
+                let slope_clone = Arc::clone(&self.slope);
+                let stop_clone = Arc::clone(&self.stop);
+                async move {
+                    //add slope for start and stop
+                    let mut divider = *slope_clone.lock().await;
+                    let mut interval = Duration::from_micros(1000000/(divider as u64));
+                    stop_clone.lock().await.set(0).unwrap();
+                    loop {
+                        if *enable_clone.lock().await {
+                            if *divider_clone.lock().await >= divider {
+                                pin_clone.lock().await.set(255).unwrap();
+                                sleep(interval);
+                                pin_clone.lock().await.set(0).unwrap();
+                                sleep(interval);
+                                divider *= 1.01;
+                                interval = Duration::from_micros(1000000/(divider as u64));
+                            } else {
+                                pin_clone.lock().await.set(255).unwrap();
+                                sleep(interval);
+                                pin_clone.lock().await.set(0).unwrap();
+                                sleep(interval);
+                            }
                         } else {
-                            pin_clone.lock().await.set(255).unwrap();
-                            sleep(interval);
-                            pin_clone.lock().await.set(0).unwrap();
-                            sleep(interval);
-                        }
-                    } else if !(*enable_clone.lock().await) {
-                        if divider >= *slope_clone.lock().await {
-                            pin_clone.lock().await.set(255).unwrap();
-                            sleep(interval);
-                            pin_clone.lock().await.set(0).unwrap();
-                            sleep(interval);
-                            divider *= 0.99;
-                            interval = Duration::from_micros(1000000/(divider as u64));
-                        } else {
-                            stop_clone.lock().await.set(1).unwrap();
-                            break;
+                            if divider >= *slope_clone.lock().await {
+                                pin_clone.lock().await.set(255).unwrap();
+                                sleep(interval);
+                                pin_clone.lock().await.set(0).unwrap();
+                                sleep(interval);
+                                divider *= 0.99;
+                                interval = Duration::from_micros(1000000/(divider as u64));
+                            } else {
+                                stop_clone.lock().await.set(1).unwrap();
+                                break;
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
+        } else { }
     }
     pub async fn stop(&mut self) {
-        *self.enable.lock().await = false;
+        if *self.enable.lock().await {
+            *self.enable.lock().await = false;
+        } else { }
     }
 } 

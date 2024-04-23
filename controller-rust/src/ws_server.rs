@@ -49,10 +49,10 @@ struct MotorMsg {
 }
 
 impl WsServer {
-    pub fn init(st: PeerMap, devs: Devices ) -> WsServer {
+    pub fn init(state: PeerMap, devices: Devices ) -> WsServer {
         WsServer {
-            state: st,
-            devices: devs,
+            state: state,
+            devices: devices,
         }
     }
         
@@ -139,7 +139,7 @@ impl WsServer {
                                                                 coll.insert_one(d,None).await.unwrap();
                                                             }
                                                         }).await.unwrap();
-                                                    } else if !params["en"].as_bool().unwrap() {
+                                                    } else if !(params["en"].as_bool().unwrap()){
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let mongo_client_clone = mongo_client.clone();
