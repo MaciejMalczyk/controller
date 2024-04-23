@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import './RotationPanel.css'; 
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
@@ -7,10 +7,16 @@ import MotorValues from '../tools/MotorValues';
 import { WebsocketServers } from '../tools/Websocket';
 import ReactSlider from "react-slider"
 
-const InfoPanel = () => {
-    
-    const [isEnabledState, isEnabledStateSet] = useState(0);
-    
+interface InfoPanelInterface {
+    isEnabledState: number;
+    isEnabledStateSet: Dispatch<SetStateAction<number>>;
+}
+
+function InfoPanel({
+    isEnabledState,
+    isEnabledStateSet,
+}: InfoPanelInterface) {
+
     useEffect(() => {
         WebsocketServers[0].send({action:"state", data: "motors"});
         window.addEventListener(MotorValues[0].enabled.event, () => {
@@ -106,6 +112,8 @@ const InfoPanel = () => {
 
 const RotationPanel = () => {
     
+    const [isEnabledState, isEnabledStateSet] = useState(0);
+    
     return (
         <div className="RotationPanel">
             <div className="RotationPanelSliders">
@@ -116,6 +124,7 @@ const RotationPanel = () => {
                         trackClassName="RotationPanelReactSliderTrack"
                         orientation="vertical"
                         invert
+                        disabled={((isEnabledState === 2) ? false : true)}
                         max={0.55}
                         step={0.005}
                         defaultValue={MotorValues[0]["velocity"].value}
@@ -131,6 +140,7 @@ const RotationPanel = () => {
                         trackClassName="RotationPanelReactSliderTrack"
                         orientation="vertical"
                         invert
+                        disabled={((isEnabledState === 2) ? false : true)}
                         max={0.55}
                         step={0.005}
                         defaultValue={MotorValues[1]["velocity"].value}
@@ -140,7 +150,10 @@ const RotationPanel = () => {
                     />
                 </div>
             </div>
-            <InfoPanel></InfoPanel>
+            <InfoPanel
+                isEnabledState={isEnabledState}
+                isEnabledStateSet={isEnabledStateSet}
+            />
         </div>
     )
 }
