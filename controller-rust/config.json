@@ -1,4 +1,4 @@
 {
-    "mongodb": "mongodb://golfserver:27017/",
+    "mongodb": "mongodb://clinostate.server:27017/",
     "device": "clinostate"
 }
