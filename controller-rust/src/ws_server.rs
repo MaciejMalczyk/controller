@@ -1,4 +1,3 @@
-use futures_channel::mpsc::{unbounded, UnboundedSender};
 use futures_util::{StreamExt, SinkExt};
 
 use tokio::net::{TcpListener, TcpStream};
@@ -109,6 +108,7 @@ impl WsServer {
                                         match action {
                                             "motors" => {
                                                 let d = message.data.unwrap();
+                                                println!("{}",d);
                                                 let data = d.as_object().unwrap();
                                                 // println!("{:?}", data);
                                                 for (id, val) in data.iter().enumerate() {
