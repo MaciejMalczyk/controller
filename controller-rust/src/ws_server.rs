@@ -86,7 +86,10 @@ impl WsServer {
             let (mut out, mut inc) = websocket_stream.split();
             
             let cfg = Arc::new(Mutex::new(config::read()));
-            let mongo_client = Client::with_options(ClientOptions::parse(cfg.lock().await.get("mongodb").unwrap().as_str().unwrap()).await.unwrap()).unwrap().clone();
+            let mongo_client_options = ClientOptions::parse(
+                cfg.lock().await.get("mongodb").unwrap().as_str().unwrap()
+            ).await.unwrap();
+            let mongo_client = Client::with_options(mongo_client_options).unwrap().clone();
 
             
             let _listener_task = tokio::spawn({
@@ -116,6 +119,24 @@ impl WsServer {
                                                     // println!("{:?}|{:?}", id, params);
                                                     if params["en"].as_bool().unwrap() {
                                                         tokio::spawn({
+                                                            let mongo_client_clone = mongo_client.clone();
+                                                            let speed_clone = params["spd"].as_f64().unwrap();
+                                                            let cfg_clone = cfg.clone();
+                                                            async move {
+                                                                let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
+                                                                let coll = db.collection::<Document>("motors");
+                                                                let d = doc!{
+                                                                    format!("motor_{}", &id): "enabled",
+                                                                    "speed": speed_clone,
+                                                                    "date": DateTime::now()
+                                                                };
+                                                                match coll.insert_one(d,None).await {
+                                                                    Ok(ok) => { println!("MongoDBClient: Data sent: {:?} | {}", ok, DateTime::now()) },
+                                                                    Err(err) => { println!("MongoDBClient: No connection: Err: {:?} | {}", err, DateTime::now()) },
+                                                                }
+                                                            }
+                                                        });
+                                                        tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let speed_clone = params["spd"].as_f64().unwrap();
                                                             async move {
@@ -124,36 +145,28 @@ impl WsServer {
                                                                 
                                                             }
                                                         }).await.unwrap();
+
+                                                    } else if !(params["en"].as_bool().unwrap()) {
                                                         tokio::spawn({
                                                             let mongo_client_clone = mongo_client.clone();
-                                                            let speed_clone = params["spd"].as_f64().unwrap();
                                                             let cfg_clone = cfg.clone();
                                                             async move {
                                                                 let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                                 let coll = db.collection::<Document>("motors");
                                                                 let d = doc!{
-                                                                    format!("motor_{}", &id): "enabled", 
-                                                                    "speed": speed_clone,
+                                                                    format!("motor_{}", &id): "disabled",
                                                                     "date": DateTime::now()
                                                                 };
-                                                                coll.insert_one(d,None).await.unwrap();
+                                                                match coll.insert_one(d,None).await {
+                                                                    Ok(ok) => { println!("MongoDBClient: Data sent: {:?} | {}", ok, DateTime::now()) },
+                                                                    Err(err) => { println!("MongoDBClient: No connection: Err: {:?} | {}", err, DateTime::now()) },
+                                                                }
                                                             }
-                                                        }).await.unwrap();
-                                                    } else if !(params["en"].as_bool().unwrap()){
+                                                        });
                                                         tokio::spawn({
-                                                            let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
-                                                            let mongo_client_clone = mongo_client.clone();
-                                                            let cfg_clone = cfg.clone();
+                                                            let motor_clone = devices.motors.get_mut(&(id as u8)).expect("Done").clone();
                                                             async move {
                                                                 motor_clone.handle.lock().await.stop().await;
-                                                                
-                                                                let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
-                                                                let coll = db.collection::<Document>("motors");
-                                                                let d = doc!{
-                                                                    format!("motor_{}", &id): "disabled", 
-                                                                    "date": DateTime::now()
-                                                                };
-                                                                coll.insert_one(d,None).await.unwrap();
                                                             }
                                                         }).await.unwrap();
                                                     }
