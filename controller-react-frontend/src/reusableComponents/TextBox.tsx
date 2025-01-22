@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, RefObject } from 'react';
+import { createRef, useEffect, RefObject } from 'react';
 import './TextBox.css';
 
 const TextBox = ( props: 

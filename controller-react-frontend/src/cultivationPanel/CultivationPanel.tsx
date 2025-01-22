@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './CultivationPanel.css';
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
@@ -34,7 +34,7 @@ const CultivationPanelLight = () => {
                     disabled={((lightEnabledState === 2) ? false : true)}
                     max={10}
                     defaultValue={CultivationValues["light"]["value"].value}
-                    onChange={(value, index) => {
+                    onChange={(value) => {
                         CultivationValues["light"]["value"].setValue(value);
                     }}
                 />
@@ -53,12 +53,12 @@ const CultivationPanelLight = () => {
                 ></TextBox>
             </div>
             <div className="CultivationPanelLightEnableButton">
-                <Button config={{
-                    parentState: lightEnabledState,
-                    stateConfig: 1,
-                    color: "#456454",
-                    enableColor: "#00fd7a",
-                    onclick: () => {
+                <Button
+                    parentState = {lightEnabledState}
+                    stateConfig = {1}
+                    color = "#456454"
+                    enableColor = "#00fd7a"
+                    onclick = {() => {
                         WebsocketServers[0].send({
                             action: "light",
                             data: {
@@ -67,23 +67,23 @@ const CultivationPanelLight = () => {
                             }
                         });
                         lightEnabledStateSet(1);
-                    }
-                }}></Button>
+                    }}
+                ></Button>
             </div>
             <div className="CultivationPanelLightDisableButton">
-                <Button config={{
-                    parentState: lightEnabledState,
-                    stateConfig: 2,
-                    color: "#591515",
-                    enableColor: "#ff1a1a",
-                    onclick: () => {
+                <Button
+                    parentState = {lightEnabledState}
+                    stateConfig = {2}
+                    color = "#591515"
+                    enableColor = "#ff1a1a"
+                    onclick = {() => {
                         WebsocketServers[0].send({
                             action: "light",
                             data: "disable"
                         });
                         lightEnabledStateSet(2);
-                    }
-                }}></Button>
+                    }}
+                ></Button>
             </div>
         </div>
     )
@@ -115,7 +115,7 @@ const CultivationPanelPump = () => {
                     invert
                     disabled={((pumpEnabledState === 2) ? false : true)}
                     defaultValue={CultivationValues["pump"]["value"].value}
-                    onChange={(value, index) => {
+                    onChange={(value) => {
                         CultivationValues["pump"]["value"].setValue(value);
                     }}
                 />
@@ -136,12 +136,12 @@ const CultivationPanelPump = () => {
                 ></TextBox>
             </div>
             <div className="CultivationPanelPumpEnableButton">
-                <Button config={{
-                    parentState: pumpEnabledState,
-                    stateConfig: 1,
-                    color: "#456454",
-                    enableColor: "#00fd7a",
-                    onclick: () => {
+                <Button
+                    parentState = {pumpEnabledState}
+                    stateConfig = {1}
+                    color = "#456454"
+                    enableColor = "#00fd7a"
+                    onclick = {() => {
                         console.log(CultivationValues["pump"]["value"].value);
                         WebsocketServers[0].send({
                             action: "pump",
@@ -151,16 +151,16 @@ const CultivationPanelPump = () => {
                             }
                         });
                         pumpEnabledStateSet(1);
-                    }
-                }}></Button>
+                    }}
+                ></Button>
             </div>
             <div className="CultivationPanelPumpDisableButton">
-                <Button config={{
-                    parentState: pumpEnabledState,
-                    stateConfig: 2,
-                    color: "#591515",
-                    enableColor: "#ff1a1a",
-                    onclick: () => {
+                <Button
+                    parentState = {pumpEnabledState}
+                    stateConfig = {2}
+                    color = "#591515"
+                    enableColor = "#ff1a1a"
+                    onclick = {() => {
                         WebsocketServers[0].send({
                             action: "pump",
                             data: {
@@ -168,8 +168,8 @@ const CultivationPanelPump = () => {
                             }
                         });
                         pumpEnabledStateSet(2);
-                    }
-                }}></Button>
+                    }}
+                ></Button>
             </div>
         </div>
     )

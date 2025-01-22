@@ -1,4 +1,4 @@
-import React, { createRef, RefObject, useEffect } from 'react';
+import { createRef, RefObject, useEffect } from 'react';
 import "./Loading.css";
 import Icons from '../tools/svg/Icons';
 
@@ -37,7 +37,12 @@ const Loading = (props:
         <div>
             {!props.connected && 
             <div className="Loading" ref={LoadingRef}>
-                <div className="LoadingIcon" ref={LoadingIconRef}>
+                <div className="LoadingContainer">
+                    <div className="LoadingIcon" ref={LoadingIconRef}>
+                    </div>
+                    <div className="LoadingText">
+                        No connection to controller...
+                    </div>
                 </div>
             </div>
             }

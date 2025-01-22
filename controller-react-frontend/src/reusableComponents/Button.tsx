@@ -1,46 +1,37 @@
-import React, { createRef, useEffect, RefObject } from 'react';
+import { createRef, useEffect, RefObject } from 'react';
 import './Button.css';
 
 interface ButtonProps {
-    config: {
-        parentState?: number,
-        stateConfig?: number,
-        color?: string,
-        enableColor?: string,
-        onclick?: () => void
-    }
+    parentState?: number,
+    stateConfig?: number,
+    color?: string,
+    enableColor?: string,
+    onclick?: () => void
 }
 
-const Button = ( props: ButtonProps) => {
+const Button = ({
+    parentState = 0,
+    stateConfig = 0,
+    color = "#373737",
+    enableColor = "#373737",
+    onclick,
+}: ButtonProps) => {
     
-    let pass: {
-        parentState?: number,
-        stateConfig?: number,
-        color?: string,
-        enableColor?: string,
-        onclick?: () => void
-    } = {
-        parentState: props.config.parentState || 0,
-        stateConfig: props.config.stateConfig || 0,
-        color: props.config.color || "#373737",
-        enableColor: props.config.enableColor || "#373737",
-        onclick: props.config.onclick
-    }
     
     const ButtonRef: RefObject<HTMLDivElement> = createRef();
     const ButtonDivRef: RefObject<HTMLDivElement> = createRef();
     const ButtonEnabledRef: RefObject<HTMLDivElement> = createRef();
     
     useEffect(() => {
-        if (pass.color) {
-            ButtonRef.current!.style.background = pass.color;
+        if (color) {
+            ButtonRef.current!.style.background = color;
         }
         
-        if (pass.enableColor) {
-            ButtonEnabledRef.current!.style.background = pass.enableColor;
+        if (enableColor) {
+            ButtonEnabledRef.current!.style.background = enableColor;
         }
         
-        if (pass.parentState === pass.stateConfig) {
+        if (parentState === stateConfig) {
             
             ButtonRef.current!.style.opacity = "0";
             ButtonEnabledRef.current!.style.opacity = "1";
@@ -63,7 +54,7 @@ const Button = ( props: ButtonProps) => {
             }
             
             ButtonEnabledRef.current!.onclick = () => {
-                pass.onclick!();
+                onclick!();
             }
         }
     });

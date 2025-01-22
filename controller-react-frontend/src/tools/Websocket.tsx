@@ -17,6 +17,7 @@ class Websocket {
     start() {
         this.ws = new WebSocket(`ws://${this.address}`);
         this.ws.onerror = (err) => {
+            this.connected.setValue(false);
             console.log(err);
         }
         
@@ -37,7 +38,6 @@ class Websocket {
         this.ws.onmessage = (msg) => {
             
             let data = JSON.parse(msg.data);
-//             console.log(data);
             if (data.action === "state") {
                 if (data.motors) {
                     Object.keys(data.motors).forEach((it) => {
@@ -69,7 +69,7 @@ class Websocket {
 }
 
 let WebsocketServers: { [key: number]: Websocket } = [];
-console.log(WebsocketServers);
+// console.log(WebsocketServers);
 
 function InitWs(address: string, id: number) {
     WebsocketServers[id] = new Websocket(address);

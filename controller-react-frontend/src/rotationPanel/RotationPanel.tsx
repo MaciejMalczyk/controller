@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect, Dispatch, SetStateAction } from 'react';
 import './RotationPanel.css'; 
 import Button from '../reusableComponents/Button';
 import NumDisplay from '../reusableComponents/NumericalDisplay';
@@ -47,12 +47,12 @@ function InfoPanel({
                 ></NumDisplay>
             </div>
             <div className="RotationPanelButtonStart">
-                <Button config={{
-                    parentState: isEnabledState, 
-                    stateConfig: 1, 
-                    color: "#456454", 
-                    enableColor: "#00fd7a", 
-                    onclick: () => {
+                <Button
+                    parentState={isEnabledState}
+                    stateConfig={1}
+                    color="#456454"
+                    enableColor="#00fd7a"
+                    onclick = {() => {
                         WebsocketServers[0].send({
                             action: "motors", data: {
                                 0: {
@@ -66,16 +66,16 @@ function InfoPanel({
                             }
                         });
                         isEnabledStateSet(1);
-                    }
-                }}></Button>
+                    }}
+                ></Button>
             </div>
             <div className="RotationPanelButtonStop">
-                <Button config={{
-                    parentState: isEnabledState, 
-                    stateConfig: 2, 
-                    color: "#591515", 
-                    enableColor: "#ff1a1a", 
-                    onclick: () => {
+                <Button
+                    parentState = {isEnabledState}
+                    stateConfig = {2}
+                    color ="#591515"
+                    enableColor = "#ff1a1a"
+                    onclick = {() => {
                         WebsocketServers[0].send({
                             action: "motors", data: {
                                 0: {
@@ -89,8 +89,8 @@ function InfoPanel({
                             }
                         });
                         isEnabledStateSet(2);
-                    }
-                }}></Button>
+                    }}
+                ></Button>
             </div>
             <div className="RotationPanelTextBoxRight">
                 <TextBox
@@ -113,7 +113,7 @@ function InfoPanel({
 const RotationPanel = () => {
     
     const [isEnabledState, isEnabledStateSet] = useState(0);
-    
+
     return (
         <div className="RotationPanel">
             <div className="RotationPanelSliders">
@@ -128,7 +128,7 @@ const RotationPanel = () => {
                         max={0.55}
                         step={0.005}
                         defaultValue={MotorValues[0]["velocity"].value}
-                        onChange={(value, index) => {
+                        onChange={(value) => {
                             MotorValues[0]["velocity"].setValue(value);
                         }}
                     />
@@ -144,7 +144,7 @@ const RotationPanel = () => {
                         max={0.55}
                         step={0.005}
                         defaultValue={MotorValues[1]["velocity"].value}
-                        onChange={(value, index) => {
+                        onChange={(value) => {
                             MotorValues[1]["velocity"].setValue(value);
                         }}
                     />

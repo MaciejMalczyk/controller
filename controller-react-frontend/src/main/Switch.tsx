@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, RefObject } from 'react';
+import { createRef, useEffect, RefObject } from 'react';
 import './Switch.css'; 
 import Icons from '../tools/svg/Icons';
 
