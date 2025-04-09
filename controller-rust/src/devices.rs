@@ -5,7 +5,7 @@ use crate::pump::Pump;
 
 use std::{
 	collections::HashMap,
-	sync::{Arc},
+	sync::Arc,
 };
 
 use tokio::sync::Mutex;

@@ -1,7 +1,7 @@
 extern crate gpiochip as gpio;
 
 use tokio::time::{sleep, Duration};
-use tokio::sync::{ Mutex };
+use tokio::sync::Mutex;
 use std::sync::Arc;
 
 pub struct Pump {
@@ -13,7 +13,7 @@ pub struct Pump {
 }
 
 impl Pump {
-    pub fn init(chip: &gpio::GpioChip, pin: u32) -> Pump {
+    pub fn new(chip: &gpio::GpioChip, pin: u32) -> Pump {
         Pump {
             pin: Arc::new(Mutex::new(chip.request(format!("gpioL_{}",pin).as_str(), gpio::RequestFlags::OUTPUT,  pin, 0).unwrap())),
             enable: Arc::new(Mutex::new(false)),
@@ -55,15 +55,20 @@ impl Pump {
                 let fi_clone = Arc::clone(&self.from_interface);
                 let moisture_clone = Arc::clone(&self.moisture);
                 let fc_clone = Arc::clone(&self.from_cultivation);
+
                 async move {
-                    
                     let watchdog = async {
                         loop {
-                            *fc_clone.lock().await = false;
-                            sleep(Duration::from_secs(150)).await;
-                            if !(*fc_clone.lock().await) {
-                                println!("SENSOR FAILURE");
-                                *enable_clone.lock().await = false;
+                            if *enable_clone.lock().await {
+                                *fc_clone.lock().await = false;
+                                sleep(Duration::from_secs(150)).await;
+                                if !(*fc_clone.lock().await) {
+                                    println!("SENSOR FAILURE");
+                                    *enable_clone.lock().await = false;
+                                    break;
+                                }
+                            } else {
+                                println!("PUMP OFF");
                                 break;
                             }
                         }
@@ -78,7 +83,7 @@ impl Pump {
                             if *moisture_clone.lock().await >= 0.0 && *fi_clone.lock().await > *moisture_clone.lock().await {
                                 pin_clone.lock().await.set(255).unwrap();
                                 println!("PUMP PUSH");
-                                sleep(Duration::from_secs(2)).await;
+                                sleep(Duration::from_secs(5)).await;
                                 pin_clone.lock().await.set(0).unwrap();
                                 println!("PUMP STOP");
                             }
@@ -94,7 +99,40 @@ impl Pump {
                     
                 }
             });
-        } else { }
+        } else {
+            println!("PUMP ALREADY IN USE");
+            return;
+        }
+    }
+
+    pub async fn unattended_start(&mut self) {
+        if !(*self.enable.lock().await) {
+            *self.enable.lock().await = true;
+            println!("PUMP ON !UNATTENDED!");
+
+            tokio::spawn({
+                let enable_clone = Arc::clone(&self.enable);
+                let pin_clone = Arc::clone(&self.pin);
+                async move {
+                    loop {
+                        if !(*enable_clone.lock().await) {
+                            pin_clone.lock().await.set(0).unwrap();
+                            println!("PUMP OFF");
+                            break;
+                        } else {
+                            pin_clone.lock().await.set(255).unwrap();
+                            println!("PUMP PUSH !UNATTENDED!");
+                        }
+                        println!("!PUMP IN UNATTENDED MODE. REMEMBER TO DISABLE!");
+                        sleep(Duration::from_millis(500)).await;
+                    }
+                }
+            });
+
+        } else {
+            println!("PUMP ALREADY IN USE");
+            return;
+        }
     }
     
     pub async fn stop(&mut self) {

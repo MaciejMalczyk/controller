@@ -8,7 +8,7 @@ use std::{
     time::Duration,
 };
 
-use tokio::sync::{Mutex};
+use tokio::sync::Mutex;
 use std::sync::Arc;
 
 pub struct Motor {
@@ -23,7 +23,7 @@ pub struct Motor {
 }
 
 impl Motor {
-    pub fn init(chip: &gpio::GpioChip, step_pin: u32, stop_pin: u32) -> Motor {
+    pub fn new(chip: &gpio::GpioChip, step_pin: u32, stop_pin: u32) -> Motor {
         Motor { 
             enable: Arc::new(Mutex::new(false)),
             pin: Arc::new(Mutex::new(chip.request(format!("gpioM_{}",step_pin).as_str(), gpio::RequestFlags::OUTPUT,  step_pin, 0).unwrap())),

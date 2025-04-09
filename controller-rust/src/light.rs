@@ -1,4 +1,4 @@
-use tokio::sync::{ Mutex };
+use tokio::sync::Mutex;
 use std::sync::Arc;
 
 use rppal::pwm::{Channel, Polarity, Pwm};
@@ -10,7 +10,7 @@ pub struct Light {
 }
 
 impl Light {
-    pub fn init(freq: f64) -> Light {
+    pub fn new(freq: f64) -> Light {
         Light {
             status: Arc::new(Mutex::new(false)),
             pwm: Arc::new(Mutex::new(Pwm::with_frequency(Channel::Pwm0, freq, 0.0, Polarity::Normal, false).unwrap())),

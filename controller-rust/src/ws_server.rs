@@ -2,21 +2,17 @@ use futures_util::{StreamExt, SinkExt};
 
 use tokio::net::{TcpListener, TcpStream};
 use tokio_tungstenite::tungstenite::protocol::Message;
-use tokio::{
-    sync::{
+use tokio::sync::{
         Mutex,
         mpsc:: {
             unbounded_channel,
             UnboundedSender,
         },
-    },
-};
+    };
 
 use std::{
     net::SocketAddr,
-    sync::{
-        Arc, 
-    },
+    sync::Arc,
     collections::HashMap,
 };
 
@@ -24,13 +20,13 @@ use serde::Deserialize;
 use serde_json::{ json, Value };
 
 use crate::{ 
-    devices::{ Devices },
+    devices::Devices,
     config,
 };
 
 use mongodb::{
     Client, 
-    options::{ClientOptions},
+    options::ClientOptions,
     bson::{doc, Document, DateTime}, 
 };
 
@@ -50,8 +46,8 @@ struct MotorMsg {
 impl WsServer {
     pub fn init(state: PeerMap, devices: Devices ) -> WsServer {
         WsServer {
-            state: state,
-            devices: devices,
+            state,
+            devices,
         }
     }
         
@@ -90,7 +86,6 @@ impl WsServer {
                 cfg.lock().await.get("mongodb").unwrap().as_str().unwrap()
             ).await.unwrap();
             let mongo_client = Client::with_options(mongo_client_options).unwrap().clone();
-
             
             let _listener_task = tokio::spawn({
                 async move {
@@ -136,6 +131,7 @@ impl WsServer {
                                                                 }
                                                             }
                                                         });
+
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("REASON").clone();
                                                             let speed_clone = params["spd"].as_f64().unwrap();
@@ -163,6 +159,7 @@ impl WsServer {
                                                                 }
                                                             }
                                                         });
+
                                                         tokio::spawn({
                                                             let motor_clone = devices.motors.get_mut(&(id as u8)).expect("Done").clone();
                                                             async move {
@@ -197,7 +194,7 @@ impl WsServer {
                                                             "motors": motors,
                                                             
                                                         });
-                                                        //println!("{:?}", msg);
+
                                                         out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
                                                     }
                                                     Some("lights") => {
@@ -214,7 +211,7 @@ impl WsServer {
                                                             "lights": lights,
                                                             
                                                         });
-                                                        //println!("{:?}", msg);
+
                                                         out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
                                                     }
                                                     Some("pumps") => {
@@ -232,7 +229,7 @@ impl WsServer {
                                                             "pumps": pumps,
                                                             
                                                         });
-                                                        //println!("{:?}", msg);
+
                                                         out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
                                                     },
                                                     Some(&_) => {
@@ -248,34 +245,35 @@ impl WsServer {
                                                 let data = message.data.unwrap();
                                                 if data["state"] == "enable" {
                                                     tokio::spawn({
-                                                        let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
-                                                        let d_clone = data.clone();
-                                                        async move {
-                                                            l_clone.handle.lock().await.pwm(d_clone["duty"].as_f64().unwrap()).await;
-                                                        }
-                                                    });
-                                                    tokio::spawn({
                                                         let mongo_client_clone = mongo_client.clone();
                                                         let cfg_clone = cfg.clone();
+                                                        let d_clone = data.clone();
                                                         async move {
                                                             let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                             let coll = db.collection::<Document>("lights");
                                                             let d = doc!{
                                                                 format!("light_{}", &0): "enabled",
-                                                                "duty": data["duty"].as_i64().unwrap(),
+                                                                "duty": d_clone["duty"].as_i64().unwrap(),
                                                                 "date": DateTime::now()
                                                             };
                                                             coll.insert_one(d,None).await.unwrap();
                                                         }
-                                                    }).await.unwrap();
-                                                } else if data == "disable" {
+                                                    });
+
                                                     tokio::spawn({
                                                         let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        let d_clone = data.clone();
+                                                        async move {
+                                                            l_clone.handle.lock().await.pwm(d_clone["duty"].as_f64().unwrap()).await;
+                                                        }
+                                                    }).await.unwrap();
+
+                                                } else if data == "disable" {
+                                                    tokio::spawn({
                                                         let mongo_client_clone = mongo_client.clone();
                                                         let cfg_clone = cfg.clone();
                                                         async move {
-                                                            l_clone.handle.lock().await.stop().await;
-                                                            
+
                                                             let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                             let coll = db.collection::<Document>("lights");
                                                             let data = doc!{
@@ -284,10 +282,15 @@ impl WsServer {
                                                             };
                                                             coll.insert_one(data,None).await.unwrap();
                                                         }
+                                                    });
+
+                                                    tokio::spawn({
+                                                        let l_clone = devices.lights.get_mut(&0).expect("REASON").clone();
+                                                        async move {
+                                                            l_clone.handle.lock().await.stop().await;
+                                                        }
                                                     }).await.unwrap();
                                                 }
-                                                
-                                                
                                             },
                                             "pump" => {
                                                 let data = message.data.unwrap();
@@ -299,36 +302,78 @@ impl WsServer {
                                                 }
                                                 
                                                 if data["state"] == "enable" {
-                                                    let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
-                                                    
-                                                    let mongo_client_clone = mongo_client.clone();
-                                                    let db = mongo_client_clone.database(cfg.lock().await.get("device").unwrap().as_str().unwrap());
-                                                    let coll = db.collection::<Document>("pumps");
-                                                    let d = doc!{
-                                                        format!("pump_{}", &0): "enabled", 
-                                                        "date": DateTime::now()
-                                                        
-                                                    };
-                                                    coll.insert_one(d,None).await.unwrap();
-                                                    
-                                                    p_clone.handle.lock().await.set_from_interface(data["value"].as_f64().unwrap()).await;
-                                                    p_clone.handle.lock().await.start().await;
+                                                    tokio::spawn({
+                                                        let mongo_client_clone = mongo_client.clone();
+                                                        let cfg_clone = cfg.clone();
+                                                        async move {
+                                                            let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
+                                                            let coll = db.collection::<Document>("pumps");
+                                                            let d = doc!{
+                                                                format!("pump_{}", &0): "enabled",
+                                                                "date": DateTime::now()
+
+                                                            };
+                                                            coll.insert_one(d,None).await.unwrap();
+                                                        }
+                                                    });
+
+                                                    tokio::spawn({
+                                                        let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
+                                                        let d_clone = data.clone();
+                                                        async move {
+                                                            p_clone.handle.lock().await.set_from_interface(d_clone["value"].as_f64().unwrap()).await;
+                                                            p_clone.handle.lock().await.start().await;
+                                                        }
+                                                    }).await.unwrap();
+
                                                 }
                                                 
                                                 if data["state"] == "disable" {
-                                                    let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
-                                                    
-                                                    let mongo_client_clone = mongo_client.clone();
-                                                    let db = mongo_client_clone.database(cfg.lock().await.get("device").unwrap().as_str().unwrap());
-                                                    let coll = db.collection::<Document>("pumps");
-                                                    let d = doc!{
-                                                        format!("pump_{}", &0): "disabled", 
-                                                        "date": DateTime::now()
-                                                    };
-                                                    coll.insert_one(d,None).await.unwrap();
-                                                    
-                                                    p_clone.handle.lock().await.stop().await;
-                                                    
+                                                    tokio::spawn({
+                                                        let mongo_client_clone = mongo_client.clone();
+                                                        let cfg_clone = cfg.clone();
+                                                        async move {
+                                                            let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
+                                                            let coll = db.collection::<Document>("pumps");
+                                                            let d = doc!{
+                                                                format!("pump_{}", &0): "disabled",
+                                                                "date": DateTime::now()
+                                                            };
+                                                            coll.insert_one(d,None).await.unwrap()
+                                                        }
+
+                                                    });
+
+                                                    tokio::spawn({
+                                                        let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
+                                                        async move {
+                                                            p_clone.handle.lock().await.stop().await;
+                                                        }
+                                                    }).await.unwrap();
+                                                }
+
+                                                if data["state"] == "enable_unattended" {
+                                                    tokio::spawn({
+                                                        let mongo_client_clone = mongo_client.clone();
+                                                        let cfg_clone = cfg.clone();
+                                                        async move {
+                                                            let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
+                                                            let coll = db.collection::<Document>("pumps");
+                                                            let d = doc!{
+                                                                format!("pump_{}", &0): "enabled_unattended",
+                                                                "date": DateTime::now()
+
+                                                            };
+                                                            coll.insert_one(d,None).await.unwrap();
+                                                        }
+                                                    });
+
+                                                    tokio::spawn({
+                                                        let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
+                                                        async move {
+                                                            p_clone.handle.lock().await.unattended_start().await;
+                                                        }
+                                                    }).await.unwrap();
                                                 }
                                             }
                                             &_ => println!("{:?}", message)

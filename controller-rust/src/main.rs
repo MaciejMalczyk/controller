@@ -32,20 +32,20 @@ async fn main() {
 	let dev = devices::Devices {
 		motors: HashMap::from([
 			(0, devices::MotorInstance {
-				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 5, 26))),
+				handle: Arc::new(Mutex::new(Motor::new(&gpiochip0, 5, 26))),
 			}),
 			(1, devices::MotorInstance {
-				handle: Arc::new(Mutex::new(Motor::init(&gpiochip0, 16, 21))),
+				handle: Arc::new(Mutex::new(Motor::new(&gpiochip0, 16, 21))),
 			}),
 		]),
 		pumps: HashMap::from([
 			(0, devices::PumpInstance {
-				handle: Arc::new(Mutex::new(Pump::init(&gpiochip0, 15))),
+				handle: Arc::new(Mutex::new(Pump::new(&gpiochip0, 15))),
 			}),
 		]),
 		lights: HashMap::from([
 			(0, devices::LightInstance {
-				handle: Arc::new(Mutex::new(Light::init(1000.0))),
+				handle: Arc::new(Mutex::new(Light::new(1000.0))),
 			}),
 		]),
 	};
