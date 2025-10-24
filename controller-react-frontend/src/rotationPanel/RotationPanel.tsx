@@ -6,6 +6,7 @@ import TextBox from '../reusableComponents/TextBox';
 import MotorValues from '../tools/MotorValues';
 import { WebsocketServers } from '../tools/Websocket';
 import ReactSlider from "react-slider"
+import config from '../config.json';
 
 interface InfoPanelInterface {
     isEnabledState: number;
@@ -125,8 +126,8 @@ const RotationPanel = () => {
                         orientation="vertical"
                         invert
                         disabled={((isEnabledState === 2) ? false : true)}
-                        max={0.55}
-                        step={0.005}
+                        max={config.motor_max_value}
+                        step={config.motor_step_value}
                         defaultValue={MotorValues[0]["velocity"].value}
                         onChange={(value) => {
                             MotorValues[0]["velocity"].setValue(value);
@@ -141,8 +142,8 @@ const RotationPanel = () => {
                         orientation="vertical"
                         invert
                         disabled={((isEnabledState === 2) ? false : true)}
-                        max={0.55}
-                        step={0.005}
+                        max={config.motor_max_value}
+                        step={config.motor_step_value}
                         defaultValue={MotorValues[1]["velocity"].value}
                         onChange={(value) => {
                             MotorValues[1]["velocity"].setValue(value);

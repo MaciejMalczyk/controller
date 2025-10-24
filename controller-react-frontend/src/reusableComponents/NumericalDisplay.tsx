@@ -1,7 +1,7 @@
 import { createRef, useEffect, RefObject } from 'react';
 import './NumericalDisplay.css';
 
-type NumDisplayProps = {
+interface NumDisplayProps {
     backgroundColor?: string,
     fontColor?: string,
     param: any,

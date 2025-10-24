@@ -29,28 +29,30 @@ const Main = () => {
             ></Loading>
             <div id="MainGrid">
                 <div id="Switches">
-                    <Switch config={{name: "RotationPanel", 
-                                    icon: "icon_rotation", 
-                                    enabled: showRotation,
-                                    onclick: () => {
-                                        if (showRotation === false) {
-                                            setShowRotation(true);
-                                        } else {
-                                            setShowRotation(false);
-                                        }
-                                    }
-                    }}></Switch>
-                    <Switch config={{name: "CultivationPanel", 
-                                    icon: "icon_cultivation", 
-                                    enabled: showCultivation,
-                                    onclick: () => {
-                                        if (showCultivation === false) {
-                                            setShowCultivation(true);
-                                        } else {    
-                                            setShowCultivation(false);
-                                        }
-                                    }
-                    }}></Switch>
+                    <Switch
+                        name="RotationPanel"
+                        icon="icon_rotation"
+                        enabled={showRotation}
+                        onclick={() => {
+                            if (showRotation === false) {
+                                setShowRotation(true);
+                            } else {
+                                setShowRotation(false);
+                            }
+                        }}
+                    />
+                    <Switch
+                        name="CultivationPanel"
+                        icon="icon_cultivation"
+                        enabled={showCultivation}
+                        onclick={() => {
+                            if (showCultivation === false) {
+                                setShowCultivation(true);
+                            } else {
+                                setShowCultivation(false);
+                            }
+                        }}
+                    />
                 </div>
                 <div id="Panels">
                     { showRotation && <RotationPanel></RotationPanel> }

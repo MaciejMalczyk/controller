@@ -2,9 +2,13 @@ import { createRef, RefObject, useEffect } from 'react';
 import "./Loading.css";
 import Icons from '../tools/svg/Icons';
 
-const Loading = (props: 
-    {connected: boolean}
-) => {
+interface LoadingProps {
+    connected: boolean
+}
+
+const Loading = ({
+    connected = false
+}:LoadingProps) => {
     
     const LoadingRef: RefObject<HTMLDivElement> = createRef();
     const LoadingIconRef: RefObject<HTMLDivElement> = createRef();
@@ -12,7 +16,7 @@ const Loading = (props:
     useEffect(() => {
         let blink: ReturnType<typeof setTimeout>
         let color = "a1beb0";
-        if (!props.connected) {
+        if (!connected) {
             LoadingIconRef.current!.setAttribute("style",`
                 -webkit-mask: url(${Icons["icon_rotation"]}) no-repeat center / contain;
                 background-color: ${("#ffffff")};
@@ -35,7 +39,7 @@ const Loading = (props:
     
     return(
         <div>
-            {!props.connected && 
+            {!connected &&
             <div className="Loading" ref={LoadingRef}>
                 <div className="LoadingContainer">
                     <div className="LoadingIcon" ref={LoadingIconRef}>

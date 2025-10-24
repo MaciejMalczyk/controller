@@ -6,6 +6,8 @@ import TextBox from '../reusableComponents/TextBox';
 import CultivationValues from '../tools/CultivationValues';
 import { WebsocketServers } from '../tools/Websocket';
 import ReactSlider from "react-slider"
+import config from '../config.json';
+
 
 const CultivationPanelLight = () => {
     
@@ -32,7 +34,7 @@ const CultivationPanelLight = () => {
                     orientation="vertical"
                     invert
                     disabled={((lightEnabledState === 2) ? false : true)}
-                    max={10}
+                    max={config.light_max_value}
                     defaultValue={CultivationValues["light"]["value"].value}
                     onChange={(value) => {
                         CultivationValues["light"]["value"].setValue(value);

@@ -1,22 +1,30 @@
 import { createRef, useEffect, RefObject } from 'react';
 import './TextBox.css';
 
-const TextBox = ( props: 
-    {text: string, backgroundColor: string, fontColor: string}
-) => {
+interface TextBoxProps {
+    text: string,
+    backgroundColor: string,
+    fontColor: string
+}
+
+const TextBox = ({
+    text = "None",
+    backgroundColor = "black",
+    fontColor = "white"
+}: TextBoxProps ) => {
     
     const TextBoxRef: RefObject<HTMLDivElement> = createRef();
     const TextBoxTextRef: RefObject<HTMLDivElement> = createRef();
     
     useEffect(() => {
-        if (props.text) {
-            TextBoxTextRef.current!.innerText = `${props.text}`;
+        if (text) {
+            TextBoxTextRef.current!.innerText = `${text}`;
         }
-        if (props.backgroundColor) {
-            TextBoxRef.current!.style.background = props.backgroundColor;
+        if (backgroundColor) {
+            TextBoxRef.current!.style.background = backgroundColor;
         }
-        if (props.fontColor) {
-            TextBoxTextRef.current!.style.color = props.fontColor;
+        if (fontColor) {
+            TextBoxTextRef.current!.style.color = fontColor;
         }
     });
         
