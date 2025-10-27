@@ -20,6 +20,7 @@ const Main = () => {
             setConnected(WebsocketServers[0].connected.value);
             console.log(WebsocketServers[0].connected)
         })
+        document.title = config.title;
     })
     
     return (
