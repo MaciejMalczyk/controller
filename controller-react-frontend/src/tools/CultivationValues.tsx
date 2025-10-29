@@ -17,6 +17,14 @@ let CultivationValues: CultivationValuesInterface = {
         value: new StateNumber(0),
         enabled: new StateBool(false),
     },
+    'pump_period_freq': {
+        value: new StateNumber(0),
+        enabled: new StateBool(false),
+    },
+    'pump_period_period': {
+        value: new StateNumber(0),
+        enabled: new StateBool(false),
+    }
 }
 
 export default CultivationValues;

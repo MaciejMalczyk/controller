@@ -50,6 +50,9 @@ class Websocket {
                 } else if (data.pumps) {
                     CultivationValues["pump"].enabled.setValue(data.pumps[0].enabled);
                     CultivationValues["pump"].value.setValue(data.pumps[0].from_interface);
+                    CultivationValues["pump_period_freq"].value.setValue(data.pumps[0].period_freq)
+                    CultivationValues["pump_period_period"].value.setValue(data.pumps[0].period_period)
+
                 }
             }
         }

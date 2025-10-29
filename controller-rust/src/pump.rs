@@ -10,6 +10,8 @@ pub struct Pump {
     moisture: Arc<Mutex<f64>>,
     from_interface: Arc<Mutex<f64>>,
     from_cultivation: Arc<Mutex<bool>>,
+    period_freq: Arc<Mutex<u64>>,
+    period_period: Arc<Mutex<u64>>,
 }
 
 impl Pump {
@@ -20,6 +22,8 @@ impl Pump {
             moisture: Arc::new(Mutex::new(0.0)),
             from_interface: Arc::new(Mutex::new(0.0)),
             from_cultivation: Arc::new(Mutex::new(true)),
+            period_freq: Arc::new(Mutex::new(1)),
+            period_period: Arc::new(Mutex::new(1)),
         }
     }
     
@@ -43,11 +47,17 @@ impl Pump {
     pub async fn get_enable(&mut self) -> bool {
         *self.enable.lock().await
     }
+    pub async fn get_period_freq(&mut self) -> u64 {
+        *self.period_freq.lock().await
+    }
+    pub async fn get_period_period(&mut self) -> u64 {
+        *self.period_period.lock().await
+    }
     
-    pub async fn start(&mut self) {
+    pub async fn sensor_start(&mut self) {
         if !(*self.enable.lock().await) {
             *self.enable.lock().await = true;
-            println!("PUMP ON");
+            println!("PUMP SENSOR MODE ON");
             
             tokio::spawn({
                 let enable_clone = Arc::clone(&self.enable);
@@ -103,6 +113,43 @@ impl Pump {
             println!("PUMP ALREADY IN USE");
             return;
         }
+    }
+
+    pub async fn period_start(&mut self, freq: u64, period: u64) {
+        if !(*self.enable.lock().await) {
+            *self.enable.lock().await = true;
+            println!("PUMP PERIOD MODE ON");
+
+            *self.period_freq.lock().await = freq;
+            *self.period_period.lock().await = period;
+
+            tokio::spawn({
+                let enable_clone = Arc::clone(&self.enable);
+                let pin_clone = Arc::clone(&self.pin);
+                let day: u64 = 86400; // [s]
+                async move {
+                    loop {
+                        if !(*enable_clone.lock().await) {
+                            pin_clone.lock().await.set(0).unwrap();
+                            println!("PUMP OFF");
+                            break;
+                        } else {
+                            println!("PUMP PUSH");
+                            pin_clone.lock().await.set(255).unwrap();
+                            sleep(Duration::from_secs(period)).await;
+                            pin_clone.lock().await.set(0).unwrap();
+                            println!("PUMP STOP");
+                        }
+                        sleep(Duration::from_secs(day/freq - period)).await;
+                    }
+                }
+            });
+
+        } else {
+            println!("PUMP ALREADY IN USE");
+            return;
+        }
+
     }
 
     pub async fn unattended_start(&mut self) {

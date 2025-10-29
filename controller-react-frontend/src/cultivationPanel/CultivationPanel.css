@@ -10,13 +10,13 @@
     grid-column: 1/2;
     display: grid;
     grid-template-columns: 96px 192px 64px auto;
-    grid-template-rows: 96px auto 32px auto 32px auto 32px auto 96px;
+    grid-template-rows: 96px min-content 32px min-content 32px min-content 32px min-content 96px;
 }
 .CultivationPanelPump {
     grid-column: 3/4;
     display: grid;
-    grid-template-columns: 192px 64px auto 96px;
-    grid-template-rows: 96px auto 32px auto 32px auto 32px auto 96px;
+    grid-template-columns: 256px 64px 256px 96px;
+    grid-template-rows: 96px min-content 96px;
 }
 .CultivationPanelLightDutySlider {
     grid-column: 2/3;

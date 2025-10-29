@@ -1,0 +1,75 @@
+.WaterTimer {
+    width: 100%;
+    height: 100%;
+    grid-row: 2/3;
+    grid-column: 1/4;
+    display: grid;
+    grid-template-rows: min-content 32px min-content;
+}
+.WaterTimerSelector {
+    grid-row: 1/2;
+    background-color: #373737;
+    width: 100%;
+    height: 100%;
+    border-radius: 32px;
+    display: grid;
+    grid-template-columns: 32px 64px auto 64px 32px;
+    grid-template-rows: 32px auto 32px;
+}
+.WaterTimerSelectorFrequency {
+    grid-row: 2/3;
+    grid-column: 2/3;
+}
+.WaterTimerSelectorFrequencySlider {
+    width: 100%;
+    height: 100%;
+}
+.WaterTimerSelectorFrequencySliderThumb {
+    width: 64px;
+    height: 32px;
+    background: #646464;
+    border-radius: 0px 4px 4px 0px;
+
+}
+.WaterTimerSelectorFrequencySliderTrack {
+    width: 32px;
+    background: #A0BDAF;
+    border-radius: 8px;
+}
+.WaterTimerSelectorPeriod {
+    grid-row: 2/3;
+    grid-column: 4/5;
+}
+.WaterTimerSelectorPeriodSlider {
+    width: 100%;
+    height: 100%;
+}
+.WaterTimerSelectorPeriodSliderThumb {
+    width: 64px;
+    height: 32px;
+    background: #646464;
+    border-radius: 4px 0px 0px 4px;
+
+}
+.WaterTimerSelectorPeriodSliderTrack {
+    width: 32px;
+    background: #A0BDAF;
+    border-radius: 8px;
+    left: 32px;
+}
+.WaterTimerSelectorDisplay {
+    grid-column: 3/4;
+    grid-row: 2/3;
+    margin: auto;
+}
+.WaterTimerButtons {
+    grid-row: 3/4;
+    display: grid;
+    grid-template-columns: min-content 64px min-content;
+}
+.WaterTimerButtonEnable {
+    grid-column: 1/2;
+}
+.WaterTimerButtonDisable {
+    grid-column: 3/4;
+}

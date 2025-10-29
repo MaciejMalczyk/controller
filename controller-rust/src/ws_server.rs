@@ -31,16 +31,17 @@ use mongodb::{
 };
 
 
-pub type PeerMap = Arc<Mutex<HashMap<SocketAddr, UnboundedSender<Message>>>>;
-pub struct WsServer {
-    state: PeerMap,
-    devices: Devices,
-}
-
 #[derive(Deserialize, Debug)]
 struct MotorMsg {
     action: String,
     data: Option<Value>,
+}
+
+pub type PeerMap = Arc<Mutex<HashMap<SocketAddr, UnboundedSender<Message>>>>;
+
+pub struct WsServer {
+    state: PeerMap,
+    devices: Devices,
 }
 
 impl WsServer {
@@ -170,77 +171,6 @@ impl WsServer {
                                                 }
                                                 
                                             },
-                                            "ping" => {
-                                                let info = json!({"action": "pong"});
-                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
-                                            },
-                                            "state" => {
-                                                let data = message.data.unwrap();
-                                                let device = data.as_str();
-                                                match device {
-                                                    Some("motors") => {
-                                                        //temporary solved
-                                                        let mut motors: [serde_json::Value; 2] = [json!({}),json!({})];
-                                                        for (_n,val) in devices.motors.iter() {
-                                                            let motor = json!({
-                                                                "speed": val.clone().handle.lock().await.get_velocity().await,
-                                                                "enabled": val.clone().handle.lock().await.get_enable().await,
-                                                                "n": _n,
-                                                            });
-                                                            motors[*_n as usize] = motor;
-                                                        }
-                                                        let msg = json!({
-                                                            "action": "state",
-                                                            "motors": motors,
-                                                            
-                                                        });
-
-                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
-                                                    }
-                                                    Some("lights") => {
-                                                        let mut lights = vec![];
-                                                        for (_n,val) in devices.lights.iter_mut() {
-                                                            let light = json!({
-                                                                "duty": val.clone().handle.lock().await.get_duty().await,
-                                                                "enabled": val.clone().handle.lock().await.get_status().await,
-                                                            });
-                                                            lights.push(light);
-                                                        }
-                                                        let msg = json!({
-                                                            "action": "state",
-                                                            "lights": lights,
-                                                            
-                                                        });
-
-                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
-                                                    }
-                                                    Some("pumps") => {
-                                                        let mut pumps = vec![];
-                                                        for (_n, val) in devices.pumps.iter_mut() {
-                                                            let pump = json!({
-                                                                "enabled": val.clone().handle.lock().await.get_enable().await,
-                                                                "moisture": val.clone().handle.lock().await.get_moisture().await,
-                                                                "from_interface": val.clone().handle.lock().await.get_from_interface().await,
-                                                            });
-                                                            pumps.push(pump);
-                                                        }
-                                                        let msg = json!({
-                                                            "action": "state",
-                                                            "pumps": pumps,
-                                                            
-                                                        });
-
-                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
-                                                    },
-                                                    Some(&_) => {
-                                                        println!("Unknown device");
-                                                    }
-                                                    None => {
-                                                        println!("err");
-                                                    }
-                                                    
-                                                }
-                                            },
                                             "light" => {
                                                 let data = message.data.unwrap();
                                                 if data["state"] == "enable" {
@@ -301,7 +231,7 @@ impl WsServer {
                                                     println!("SENSOR MOISTURE: {}", data["value"].as_f64().unwrap());
                                                 }
                                                 
-                                                if data["state"] == "enable" {
+                                                if data["state"] == "enable_sensor" {
                                                     tokio::spawn({
                                                         let mongo_client_clone = mongo_client.clone();
                                                         let cfg_clone = cfg.clone();
@@ -309,7 +239,7 @@ impl WsServer {
                                                             let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                             let coll = db.collection::<Document>("pumps");
                                                             let d = doc!{
-                                                                format!("pump_{}", &0): "enabled",
+                                                                format!("pump_{}", &0): "enabled_sensor",
                                                                 "date": DateTime::now()
 
                                                             };
@@ -322,34 +252,42 @@ impl WsServer {
                                                         let d_clone = data.clone();
                                                         async move {
                                                             p_clone.handle.lock().await.set_from_interface(d_clone["value"].as_f64().unwrap()).await;
-                                                            p_clone.handle.lock().await.start().await;
+                                                            p_clone.handle.lock().await.sensor_start().await;
                                                         }
                                                     }).await.unwrap();
 
                                                 }
-                                                
-                                                if data["state"] == "disable" {
+
+                                                if data["state"] == "enable_period" {
                                                     tokio::spawn({
                                                         let mongo_client_clone = mongo_client.clone();
                                                         let cfg_clone = cfg.clone();
+                                                        let d_clone = data.clone();
                                                         async move {
                                                             let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
                                                             let coll = db.collection::<Document>("pumps");
                                                             let d = doc!{
-                                                                format!("pump_{}", &0): "disabled",
+                                                                format!("pump_{}", &0): "enabled_period",
+                                                                "freq": d_clone["freq"].as_i64().unwrap(),
+                                                                "period": d_clone["period"].as_i64().unwrap(),
                                                                 "date": DateTime::now()
-                                                            };
-                                                            coll.insert_one(d,None).await.unwrap()
-                                                        }
 
+                                                            };
+                                                            coll.insert_one(d,None).await.unwrap();
+                                                        }
                                                     });
 
                                                     tokio::spawn({
                                                         let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
+                                                        let d_clone = data.clone();
                                                         async move {
-                                                            p_clone.handle.lock().await.stop().await;
+                                                            p_clone.handle.lock().await.period_start(
+                                                                d_clone["freq"].as_u64().unwrap(),
+                                                                d_clone["period"].as_u64().unwrap()
+                                                            ).await;
                                                         }
                                                     }).await.unwrap();
+
                                                 }
 
                                                 if data["state"] == "enable_unattended" {
@@ -375,7 +313,104 @@ impl WsServer {
                                                         }
                                                     }).await.unwrap();
                                                 }
+                                                
+                                                if data["state"] == "disable" {
+                                                    tokio::spawn({
+                                                        let mongo_client_clone = mongo_client.clone();
+                                                        let cfg_clone = cfg.clone();
+                                                        async move {
+                                                            let db = mongo_client_clone.database(cfg_clone.lock().await.get("device").unwrap().as_str().unwrap());
+                                                            let coll = db.collection::<Document>("pumps");
+                                                            let d = doc!{
+                                                                format!("pump_{}", &0): "disabled",
+                                                                "date": DateTime::now()
+                                                            };
+                                                            coll.insert_one(d,None).await.unwrap()
+                                                        }
+
+                                                    });
+
+                                                    tokio::spawn({
+                                                        let p_clone = devices.pumps.get_mut(&0).expect("Done").clone();
+                                                        async move {
+                                                            p_clone.handle.lock().await.stop().await;
+                                                        }
+                                                    }).await.unwrap();
+                                                }
                                             }
+                                            "ping" => {
+                                                let info = json!({"action": "pong"});
+                                                out.send(Message::Text(serde_json::to_string(&info).unwrap())).await.ok();
+                                            },
+                                            "state" => {
+                                                let data = message.data.unwrap();
+                                                let device = data.as_str();
+                                                match device {
+                                                    Some("motors") => {
+                                                        //temporary solved
+                                                        let mut motors: [serde_json::Value; 2] = [json!({}),json!({})];
+                                                        for (_n,val) in devices.motors.iter() {
+                                                            let motor = json!({
+                                                                "speed": val.clone().handle.lock().await.get_velocity().await,
+                                                                "enabled": val.clone().handle.lock().await.get_enable().await,
+                                                                "n": _n,
+                                                            });
+                                                            motors[*_n as usize] = motor;
+                                                        }
+                                                        let msg = json!({
+                                                            "action": "state",
+                                                            "motors": motors,
+
+                                                        });
+
+                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
+                                                    }
+                                                    Some("lights") => {
+                                                        let mut lights = vec![];
+                                                        for (_n,val) in devices.lights.iter_mut() {
+                                                            let light = json!({
+                                                                "duty": val.clone().handle.lock().await.get_duty().await,
+                                                                "enabled": val.clone().handle.lock().await.get_status().await,
+                                                            });
+                                                            lights.push(light);
+                                                        }
+                                                        let msg = json!({
+                                                            "action": "state",
+                                                            "lights": lights,
+
+                                                        });
+
+                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
+                                                    }
+                                                    Some("pumps") => {
+                                                        let mut pumps = vec![];
+                                                        for (_n, val) in devices.pumps.iter_mut() {
+                                                            let pump = json!({
+                                                                "enabled": val.clone().handle.lock().await.get_enable().await,
+                                                                "moisture": val.clone().handle.lock().await.get_moisture().await,
+                                                                "from_interface": val.clone().handle.lock().await.get_from_interface().await,
+                                                                "period_freq": val.clone().handle.lock().await.get_period_freq().await,
+                                                                "period_period": val.clone().handle.lock().await.get_period_period().await
+                                                            });
+                                                            pumps.push(pump);
+                                                        }
+                                                        let msg = json!({
+                                                            "action": "state",
+                                                            "pumps": pumps,
+
+                                                        });
+
+                                                        out.send(Message::Text(serde_json::to_string(&msg).unwrap())).await.ok();
+                                                    },
+                                                    Some(&_) => {
+                                                        println!("Unknown device");
+                                                    }
+                                                    None => {
+                                                        println!("err");
+                                                    }
+
+                                                }
+                                            },
                                             &_ => println!("{:?}", message)
                                         }
                                     }

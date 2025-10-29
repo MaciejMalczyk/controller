@@ -5,5 +5,7 @@
     "backend_addr": "127.0.0.1:8080",
     "light_max_value": 10,
     "motor_max_value": 0.1,
-    "motor_step_value": 0.005
+    "motor_step_value": 0.005,
+    "water_max_frequency": 24,
+    "water_max_period": 30
 }
