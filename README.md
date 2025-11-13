@@ -16,7 +16,13 @@ Node.js: https://nodejs.org/en
 ### Hardware
 Raspberry Pi with built-in PWM generator (needs to be enabled with dtoverlay=pwm-2chan in /boot/config.txt).
 
-Any 2 stepper motors with any 2 stepper drivers that utilize "step pin" for motor stepping. 
+Any 2 stepper motors with any 2 stepper drivers that utilize "step pin" for motor stepping.
+
+## Network setup
+
+Wireless network can be setup through Raspberry Pi Imager in advanced options.
+
+If you want to use Wireguard VPN you will need an endpoint with public ip address.
 
 ## Build 
 Go into controller-rust and run `cargo build` to build the backend
