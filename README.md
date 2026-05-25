@@ -3,6 +3,8 @@
 
 Compatible with any stepper motor and driver that utilizes "step pin" as a trigger to step a motor. Compatible with Raspberry Pi with PWM generator.
 
+Part of larger repository: https://github.com/MaciejMalczyk/clinostat-capsule
+
 ## Requirements
 
 ### Hostname
